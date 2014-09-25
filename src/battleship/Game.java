@@ -32,7 +32,7 @@ public class Game
 	/**
 	 * Just calls primary game loop method with appropriate argument.
      *
-     *
+     * @throws FileNotFoundException if no initial AI ships text file
 	 */
 	public static void main(String[] args) throws FileNotFoundException {
         // true because first playthrough of game.
