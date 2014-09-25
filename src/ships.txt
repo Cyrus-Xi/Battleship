@@ -1,0 +1,11 @@
+  ABCDEFGHIJ
+ 1  CCC   A
+ 2        A
+ 3        A
+ 4        A 
+ 5        A 
+ 6 BBBB
+ 7
+ 8  DD
+ 9
+10       SSS

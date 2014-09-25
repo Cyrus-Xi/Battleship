@@ -1,0 +1,11 @@
+  ABCDEFGHIJ
+ 1AAAAA
+ 2
+ 3  C    
+ 4DDC    
+ 5  C
+ 6BBBB
+ 7
+ 8S
+ 9S
+10S
