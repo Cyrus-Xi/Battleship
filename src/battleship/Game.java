@@ -66,20 +66,20 @@ public class Game
             playOneTurn(playerGameBoard, computerGameBoard);
         }
 		// Loop until one game board has no ships left.
-        while (!playerGameBoard.noShipsLeft() &&
-                !computerGameBoard.noShipsLeft());
+        while (!playerGameBoard.areNoShipsLeft() &&
+                !computerGameBoard.areNoShipsLeft());
 
-        if (computerGameBoard.noShipsLeft())
+        if (computerGameBoard.areNoShipsLeft())
         {
             System.out.println("\nCongratuations, you've won! Nice job.");
         }
-        else if (playerGameBoard.noShipsLeft())
+        else if (playerGameBoard.areNoShipsLeft())
         {
             System.out.println("\nSorry, the computer has beaten you. Better luck next time!");
         }
 
         System.out.printf("\nDo you want to play again? Enter %s or %s: ", "Y", "N");
-        if (reader.next().equals("Y"))
+        if (reader.next().equals("Y") || reader.next().equals("y"))
         {
             // Call itself, but with argument false since no longer first time.
             playGame(false);
@@ -143,7 +143,8 @@ public class Game
                             {
                                 System.out.println("Your ship placement " +
                                         "interferes with other ships' " +
-                                        "placement. Please try again.\n");
+                                        "placement or goes off the board. " +
+                                        "Please try again.\n");
                             }
 
                         }

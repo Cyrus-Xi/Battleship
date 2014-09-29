@@ -347,12 +347,15 @@ public class GameBoard
 	 * @param rawRow            user-inputted row number
 	 * @param rawCol            user-inputted col letter
 	 */
-	public void updateBoardAfterShot(boolean belongsToComputer, int rawRow, char rawCol)
+	public String updateBoardAfterShot(boolean belongsToComputer, int rawRow,
+                                  char rawCol)
 	{
 		// Subtract 1 because board is 0-indexed.
 		int row = rawRow - 1;
 		// Convert column letter to numerical index.
 		int col = "ABCDEFGHIJ".indexOf(rawCol);
+
+        String message = "";
 		
 		/* A miss. */
 		if (board[row][col] == ' ') 
@@ -379,18 +382,20 @@ public class GameBoard
 			/* Get appropriate string to be outputted. */
 			if (belongsToComputer)
 			{
-				String message = getHitMessage(true, row, col);
+				message = getHitMessage(true, row, col);
 				System.out.printf("\n%d%s was a hit. %s", rawRow, rawCol, message);
 			}
 			else
 			{
-				String message = getHitMessage(false, row, col);
+				message = getHitMessage(false, row, col);
 				System.out.printf("The computer hit with %d%s. %s", rawRow, 
 									rawCol, message);
 			}
 			/* Mark it as a hit. */
 			board[row][col] = 'X';
 		}
+        // For the benefit of the computer's strategy.
+        return message;
 	}
 	
 	/**
@@ -419,7 +424,7 @@ public class GameBoard
 		/* 
 		 * Access currShip by index. Ships will always be in same position
 		 * even when sunk, because each ship is just an object containing an array
-		 * of ShipPointTuples. Being sunk merely means the ship has an empty array
+		 * of ShipPoints. Being sunk merely means the ship has an empty array
 		 * of the tuples.
 		 */
 		switch (type) 
@@ -556,7 +561,7 @@ public class GameBoard
 	 * 
 	 * @return boolean true if there are no ships left. Other player has won.
 	 */
-	public boolean noShipsLeft()
+	public boolean areNoShipsLeft()
 	{
 		Ship currShip;
 		
@@ -577,7 +582,7 @@ public class GameBoard
 	/** 
 	 * Replaces default toString() with a much more reader-friendly version. 
 	 * 
-	 * @return String representation of game board
+	 * @return representation of game board
 	 */
 	public String toString()
 	{
