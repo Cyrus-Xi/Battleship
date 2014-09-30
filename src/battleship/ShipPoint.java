@@ -39,7 +39,28 @@ public class ShipPoint
 	{
 		return shipType;
 	}
-	
+
+    public String getLongType()
+    {
+        switch (shipType)
+        {
+            case 'A': return "Carrier";
+            case 'B': return "Battleship";
+            case 'C': return "Cruiser";
+            case 'S': return "Submarine";
+            case 'D': return "Destroyer";
+            case ' ': return "Unknown";
+            default:
+            {
+                System.out.println("Something went wrong with the ship type. " +
+                        "Exiting");
+                System.exit(1);
+                break;
+            }
+        }
+        return "";
+    }
+
 	/**
 	 * Returns point's row-coordinate.
 	 * 

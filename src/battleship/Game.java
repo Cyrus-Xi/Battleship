@@ -71,7 +71,7 @@ public class Game
 
         if (computerGameBoard.areNoShipsLeft())
         {
-            System.out.println("\nCongratuations, you've won! Nice job.");
+            System.out.println("\nCongratulations, you've won! Nice job.");
         }
         else if (playerGameBoard.areNoShipsLeft())
         {
@@ -79,8 +79,10 @@ public class Game
         }
 
         System.out.printf("\nDo you want to play again? Enter %s or %s: ", "Y", "N");
-        if (reader.next().equals("Y") || reader.next().equals("y"))
+        char response = reader.next().charAt(0);
+        if (response == 'Y' || response == 'y')
         {
+            System.out.println("Okay, new game commencing. Good luck!");
             // Call itself, but with argument false since no longer first time.
             playGame(false);
         }
