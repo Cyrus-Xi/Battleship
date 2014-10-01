@@ -8,21 +8,31 @@ package battleship;
 
 import java.util.*;
 
+/**
+ * Represents a Ship object.
+ */
 public class Ship 
 {
+    /**
+     * Ship is just an array of ShipPoints.
+     */
 	ArrayList<ShipPoint> primitiveShip;
+    /**
+     * Name of ship.
+     */
 	String name;
 	
 	/**
-	 * Construct ship from list of ShipPointTuples.
+	 * Construct ship from list of ShipPoints.
 	 * 
-	 * @param shipPoints list of ShipPointTuples
+	 * @param shipPoints list of ShipPoints
 	 */
 	public Ship(ArrayList<ShipPoint> shipPoints) 
 	{
 		primitiveShip = shipPoints;
-		/* The specific point used in determining shipType doesn't matter. */
+		// The specific point used in determining shipType doesn't matter.
 		char type = shipPoints.get(0).getType();
+        // From char type, get actual name.
 		switch (type) 
 		{
 			case 'A':
@@ -41,16 +51,18 @@ public class Ship
 				name = "Destroyer";
 				break;
 			default:
-				System.out.printf("Something went wrong! %s isn't a legal ship type.", type);
+				System.out.printf("Something went wrong! %s isn't a legal " +
+                        "ship type.", type);
 				System.exit(1);
 				break;
 		}
 	}
 	
 	/**
-	 * Returns whether ship has sunk, i.e., whether all its points have been hit.
+	 * Returns whether ship has sunk, i.e., whether all its points have been
+     * hit.
 	 * 
-	 * @return boolean true if ship has been sunk
+	 * @return true if ship has been sunk
 	 */
 	public boolean isSunk()
 	{
@@ -60,22 +72,25 @@ public class Ship
 	/**
 	 * Remove hit ship point from ship's list of points.
 	 * 
-	 * @param row int value of hit
-	 * @param col int value of hit
+	 * @param row row value of hit
+	 * @param col col value of hit
 	 */
 	public void updateShipAfterShot(int row, int col)
 	{
-		/* shipType argument doesn't matter, since equals() just cares about coordinates. */
+		/*
+         *shipType argument doesn't matter, since overridden equals() just
+         * cares about coordinates.
+         */
 		ShipPoint hit = new ShipPoint('Z', row, col);
 		primitiveShip.remove(hit);
 	}
 
-	@Override
 	/** 
 	 * Replaces default toString() with a much more reader-friendly version. 
 	 * 
-	 * @return String representation of Ship object
+	 * @return representation of Ship object
 	 */
+    @Override
 	public String toString()
 	{
 		StringBuilder result = new StringBuilder();
@@ -85,7 +100,7 @@ public class Ship
 			result.append(" ");
 			result.append(primitiveShip.get(i));
 			
-			/* Comma after each tuple except the last one. */
+			// Comma after each tuple except the last one.
 			if (i < primitiveShip.size()-1) 
 			{
 				result.append(",");

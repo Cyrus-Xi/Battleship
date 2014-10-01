@@ -7,19 +7,33 @@
 
 package battleship;
 
+/**
+ * Represents a point of a Ship on the board.
+ */
 public class ShipPoint
 {
+    /**
+     * The row value of the point.
+     */
 	int row;
+    /**
+     * The col value of the point.
+     */
 	int col;
+    /**
+     * The char ship type that the point is.
+     */
 	char shipType;
-	
-	/* For more easily readable string output later. */
+
+    /**
+     * For more easily readable string output later.
+     */
 	char[] columnHeaders = "ABCDEFGHIJ".toCharArray();
 	
 	/**
-	 * Constructs ShipPointTuple from type and board coordinates.
+	 * Constructs ShipPoint from type and board coordinates.
 	 * 
-	 * @param type char that represents ship's type
+	 * @param type    char that represents ship's type
 	 * @param theRow  index of point on board
 	 * @param theCol  index of point on board
 	 */
@@ -40,6 +54,11 @@ public class ShipPoint
 		return shipType;
 	}
 
+    /**
+     * Returns long version of ship's type (i.e., its name).
+     *
+     * @return the ship's name
+     */
     public String getLongType()
     {
         switch (shipType)
@@ -58,13 +77,14 @@ public class ShipPoint
                 break;
             }
         }
+        // Should never reach here.
         return "";
     }
 
 	/**
 	 * Returns point's row-coordinate.
 	 * 
-	 * @return int row index on board
+	 * @return row index on board
 	 */
 	public int getRow()
 	{
@@ -74,7 +94,7 @@ public class ShipPoint
 	/**
 	 * Returns point's col-coordinate.
 	 * 
-	 * @return int col index on board
+	 * @return col index on board
 	 */
 	public int getCol()
 	{
@@ -82,13 +102,15 @@ public class ShipPoint
 	}
 	
 	/** 
-	 * Eclipse auto-generated. Implemented for usage of ArrayList methods elsewhere.
+	 * Eclipse auto-generated. Implemented for usage of ArrayList methods
+     * elsewhere.
 	 *
 	 * @see    java.lang.Object#hashCode()
 	 * @return int hash code
 	 */
 	@Override
-	public int hashCode() {
+	public int hashCode()
+    {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + col;
@@ -97,13 +119,15 @@ public class ShipPoint
 	}
 
 	/** 
-	 * Eclipse auto-generated. Implemented for usage of ArrayList methods elsewhere.
+	 * Eclipse auto-generated. Implemented for usage of ArrayList methods
+     * elsewhere.
 	 * 
 	 * @see    java.lang.Object#equals(java.lang.Object)
-	 * @return boolean true if ShipPointTuples considered equal, false otherwise
+	 * @return true if ShipPoints considered equal, false otherwise
 	 */
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(Object obj)
+    {
 		if (this == obj) 
 		{
 			return true;
@@ -117,28 +141,21 @@ public class ShipPoint
 			return false;
 		}
 		ShipPoint other = (ShipPoint) obj;
-		if (col != other.col) {
-			return false;
-		}
-		if (row != other.row) {
-			return false;
-		}
-		return true;
-	}
+        return other.col == col && other.row == row;
+    }
 
-	@Override
 	/** 
 	 * Replaces default toString() with a much more reader-friendly version. 
 	 * 
-	 * @return String representation of a ShipPointTuple
+	 * @return representation of a ShipPointTuple
 	 */
+    @Override
 	public String toString()
 	{
-		StringBuilder result = new StringBuilder();
-		
-		/* rowX+1 and columnHeaders[colY] to correspond to the game board the user sees. */
-		result.append(String.format("(%d, %s)", row+1, columnHeaders[col]));
-		
-		return result.toString();
+        /*
+		 * rowX+1 and columnHeaders[colY] to correspond to the game board the
+		 * user sees.
+		 */
+        return String.format("(%d, %s)", row + 1, columnHeaders[col]);
 	}
 }

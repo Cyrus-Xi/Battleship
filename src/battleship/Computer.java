@@ -9,6 +9,9 @@ package battleship;
 
 import java.util.*;
 
+/**
+ * Represents the Computer player.
+ */
 public class Computer
 {
 	/* 
@@ -17,11 +20,28 @@ public class Computer
 	 * will not, of course, actually use that information in its strategy (i.e., 
 	 * where it chooses to shoot each turn).
 	 */
+
+    /**
+     * Human player's board.
+     */
 	GameBoard ofOpponent;
+    /**
+     * The primitive/actual board.
+     */
 	char [][] rawBoard;
+    /**
+     * Row of point to be shot at.
+     */
 	int row;
+    /**
+     * Col of point to be shot at.
+     */
 	int col;
 
+    /**
+     * The spacing of shots. E.g., when parity is 2, list of points to be
+     * considered are those that are exactly 2 spaces apart.
+     */
     int parity = 2;
 
     /**
@@ -93,20 +113,38 @@ public class Computer
             {9, 4}, {9, 9},
         };
 
+    /**
+     * A stack of points to be shot at next after a successful shot.
+     * This represents the "Target" phase where the AI tries to finish off a
+     * ship it has hit. The other phase is the "Hunt" one where the AI tries
+     * to find a ship.
+     */
 	Stack<ShipPoint> possibleHits = new Stack<ShipPoint>();
 
+    /**
+     * Ships that the AI has sunk.
+     */
     ArrayList<String> shipsSunk = new ArrayList<String>();
 
+    /**
+     * Ships currently being targeted.
+     */
     ArrayList<String> shipsTargeted = new ArrayList<String>();
 
-    // Whether ship is going horizontally or vertically.
+    /**
+     * Whether opponent's ship is going horizontally or vertically.
+     */
     String direction = "";
 
-    // Array of pointhit arrays.
+    /**
+     * Array of pointHits, successful shots.
+     */
     ArrayList<ArrayList<Object>> pointsTargeted = new
             ArrayList<ArrayList<Object>>();
 
-	// To convert random col to column letter.
+    /**
+     * To convert random col to column letter.
+     */
 	char[] columnHeaders = "ABCDEFGHIJ".toCharArray();
 	
 	/**
@@ -127,176 +165,52 @@ public class Computer
 	 */
 	public void playOneTurn(GameBoard ofHuman){
 		ofOpponent = ofHuman;
+
         // Update board each turn.
         rawBoard = ofOpponent.getBoard();
 		ShipPoint currPoint;
 
         String message;
-        String shipName;
-
         char type;
 
-        // Array of shipname, row, col.
-        ArrayList<Object> pointHit = new ArrayList<Object>();
+        // Whether ship has been sunk.
         boolean sunk = false;
 
-		Random rand;
-        int boardIndex;
+        // Get right board to be considered.
         int[][] parityBoard = getRightBoard(parity);
 
-		/*
-		 * Stack being empty represents Hunt phase (looking for ships);
-         * stack not being empty represents Target phase (finishing off ships
-         * that were hit).
-         */
-
-        // Shoot randomly using appropriate parity board if nothing on stack.
-		if (possibleHits.empty())
-		{
-            System.out.println("HUNT: Shoot randomly");
-			/* 
-			 * Loop until get random index that results in row & col values
-			 * that represent a point not yet shot at.
-			 */
-			while (true)
-			{
-				rand = new Random();
-                int max = parityBoard.length;
-                /*
-				 * Exclusive of max value, which is what we want since we're
-				 * using the array's length as max.
-				 */
-                boardIndex = rand.nextInt(max);
-				row = parityBoard[boardIndex][0];
-				col = parityBoard[boardIndex][1];
-				
-				/* If haven't shot there yet, exit loop. */
-				if (rawBoard[row][col] != 'X' && rawBoard[row][col] != 'O')
-				{
-					break;
-				}
-			}
-		}
+        // No stack of possible hits (i.e., not trying to finish off hit
+        // ships) so get random row & col values for shot.
+        if (possibleHits.isEmpty())
+        {
+            setRandomShot(parityBoard);
+        }
         // Else use stack of possible hits (like a depth-based search).
 		else
 		{
-            System.out.println("TARGET: Use stack, not randomly shoot");
 			currPoint = possibleHits.pop();
 			row = currPoint.getRow();
 			col = currPoint.getCol();
 		}
 		type = rawBoard[row][col];
+
+        // Get information about shot.
 		message = ofOpponent.updateBoardAfterShot(false, row+1,
                 columnHeaders[col]);
 
         // If shot was a hit (non-empty message).
         if (!message.equals(""))
         {
-            System.out.println("Shot was a hit");
-            shipName = getNameFromMessage(message);
-            sunk = isSunk(message);
-
-            pointHit.add(shipName);
-            pointHit.add(row);
-            pointHit.add(col);
-            System.out.printf("Adding this point: %s, %d, %d\n", shipName,
-                    row, col);
-            pointsTargeted.add(pointHit);
-            System.out.println("Printing out shipsTargeted");
-            for (String name : shipsTargeted)
-            {
-                System.out.println(name);
-            }
-            if (!sunk)
-            {
-                System.out.println("Not sunk");
-                // Ensure no duplicates.
-                if (!shipsTargeted.contains(shipName))
-                {
-                    System.out.println("Haven't hit yet; adding");
-                    // Add ship hit to list.
-                    shipsTargeted.add(shipName);
-                    System.out.printf("name: %s\n", shipName);
-                    System.out.println("Printing out shipsTargeted");
-                    for (String name : shipsTargeted)
-                    {
-                        System.out.println(name);
-                    }
-
-                }
-                // Already hit once so can determine direction.
-                else
-                {
-                    System.out.println("Hit already");
-                    // Get direction if don't already know.
-                    if (direction.equals(""))
-                    {
-                        direction = getDirection(shipName);
-                    }
-                    System.out.printf("Direction: %s\n", direction);
-                    /*
-                     * Now know direction, but could've pushed errant points
-                     * before. Correct stack.
-                     */
-                     updateStack(row, col, direction);
-                }
-            }
-            // If sunk, remove from list and see if need to update parity.
-            else
-            {
-                System.out.println("Sunk!");
-                System.out.println("Remove from lists & update parity");
-                shipsSunk.add(shipName);
-                shipsTargeted.remove(shipName);
-
-                /*
-                 * Remove all the points of that ship from list.
-                 * Use an iterator to avoid a concurrent modification
-                 * exception (caused by removing items from an arraylist
-                 * while iterating through it).
-                 */
-                Iterator<ArrayList<Object>> iter = pointsTargeted.iterator();
-
-                while (iter.hasNext())
-                {
-                    ArrayList<Object> point = iter.next();
-
-                    if (point.get(0).equals(shipName))
-                    {
-                        iter.remove();
-                    }
-                }
-                // Reset direction since ship sunk.
-                direction = "";
-                updateParity();
-            }
-
-            /*
-             * No ships targeted; would be inefficient to keep popping stack.
-             * AI would then keep looking around the perimeter of a ship even
-               when it has been sunk.
-             */
-            if (shipsTargeted.isEmpty())
-            {
-                System.out.println("Empty stack, go to HUNT phase");
-                // Clear stack and return to Hunt phase.
-                while (!possibleHits.empty())
-                {
-                    possibleHits.pop();
-                }
-            }
+            sunk = updateOnHit(message);
         }
 
-        /*
-         * When hit a ship, first determine its name and whether it was sunk.
-         * If not sunk, append to array IF not already on array. If sunk,
-         * delete that ship from array. If array empty, end Target phase.
-         */
-
+        // Update board.
         rawBoard = ofOpponent.getBoard();
+
         /*
          * Only add plausible candidates to stack if still in Target phase and
-         * if didn't just sink a ship.
+         * if didn't just sink a ship. The latter because though sinking shot
+          * must have been successful, don't need to look around that ship.
          */
         if (!shipsTargeted.isEmpty() && !sunk)
         {
@@ -304,8 +218,6 @@ public class Computer
             if (rawBoard[row][col] == 'X')
             {
                 currPoint = new ShipPoint(type, row, col);
-
-                System.out.println("Add points to stack");
                 // Add feasible points around successful hit to stack.
                 addPointsAround(currPoint, direction);
             }
@@ -315,10 +227,10 @@ public class Computer
          * Go back to a point of another ship that was hit and push possible
          * hits to stack using that.
          */
-        else if (!shipsTargeted.isEmpty() && sunk)
+        else if (!shipsTargeted.isEmpty())
         {
-            System.out.printf("Sunk: %b\n", sunk);
-            ArrayList<Object> pointLeft = pointsTargeted.get(0);
+            ArrayList<Object> pointLeft;
+            pointLeft = pointsTargeted.get(0);
             int rowLeft = (Integer)pointLeft.get(1);
             int colLeft = (Integer)pointLeft.get(2);
 
@@ -330,8 +242,8 @@ public class Computer
     /**
      * Depending on the parity, get the right 2d array to use.
      *
-     * @param parity
-     * @return
+     * @param  parity number of spaces between considered shots
+     * @return 2D int array representing shots that should be taken
      */
     private int[][] getRightBoard(int parity)
     {
@@ -353,6 +265,115 @@ public class Computer
             parityBoard =  fiveParityBoard;
         }
         return parityBoard;
+    }
+
+    /**
+     * Using parity board, set random point.
+     *
+     * @param pBoard parity board to be used in getting random point
+     */
+    private void setRandomShot(int[][] pBoard)
+    {
+        Random rand;
+        int boardIndex;
+
+        // Shoot randomly using appropriate parity board if nothing on stack.
+        if (possibleHits.empty())
+        {
+			/*
+			 * Loop until get random index that results in row & col values
+			 * that represent a point not yet shot at.
+			 */
+            while (true)
+            {
+                rand = new Random();
+                int max = pBoard.length;
+                /*
+				 * Exclusive of max value, which is what we want since we're
+				 * using the array's length as max.
+				 */
+                boardIndex = rand.nextInt(max);
+                row = pBoard[boardIndex][0];
+                col = pBoard[boardIndex][1];
+
+                // If haven't shot there yet, exit loop.
+                if (rawBoard[row][col] != 'X' && rawBoard[row][col] != 'O')
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates on shot being a hit: gets direction, figures if sunk, etc.
+     *
+     * @param message the message printed from a shot
+     * @return        true if ship was sunk from hit
+     */
+    private boolean updateOnHit(String message)
+    {
+        String shipName;
+        boolean sunk;
+
+        // Array of ship type, row, col.
+        ArrayList<Object> pointHit = new ArrayList<Object>();
+
+        // Get ship name and whether it was sunk.
+        shipName = getNameFromMessage(message);
+        sunk = isSunk(message);
+
+        pointHit.add(shipName);
+        pointHit.add(row);
+        pointHit.add(col);
+        pointsTargeted.add(pointHit);
+
+        // Ship hit but not sunk.
+        if (!sunk)
+        {
+            // Ensure no duplicates.
+            if (!shipsTargeted.contains(shipName))
+            {
+                // Add ship hit to list.
+                shipsTargeted.add(shipName);
+            }
+            // Already hit once so can determine direction.
+            else
+            {
+                /*
+                 * Get direction if don't already know, i.e.,
+                 * don't change direction if already know it.
+                 */
+                if (direction.equals(""))
+                {
+                    direction = getDirection(shipName);
+                }
+                /*
+                 * Now know direction, but could've pushed errant points
+                 * before. Correct stack.
+                 */
+                updateStack(row, col, direction);
+            }
+        }
+        // If sunk, update.
+        else
+        {
+            updateOnSunkShip(shipName);
+        }
+        /*
+         * No ships targeted; would be inefficient to keep popping stack.
+         * AI would then keep looking around the perimeter of a ship even
+           when it has been sunk.
+         */
+        if (shipsTargeted.isEmpty())
+        {
+            // Clear stack and return to Hunt phase.
+            while (!possibleHits.empty())
+            {
+                possibleHits.pop();
+            }
+        }
+        return sunk;
     }
 
     /**
@@ -396,6 +417,7 @@ public class Computer
     private boolean isSunk(String message)
     {
         boolean toReturn = false;
+
         // Based on the getHitMessage method.
         if (message.contains("but did not sink"))
         {
@@ -408,57 +430,54 @@ public class Computer
         return toReturn;
     }
 
+    /**
+     * From hitting a ship twice, can get what direction it is lying in.
+     *
+     * @param name name of ship hit
+     * @return     direction ship is lying in
+     */
     private String getDirection(String name)
     {
         String toReturn = "";
 
-        System.out.printf("Ship name: %s\n", name);
-
         ArrayList<ArrayList<Object>> shipPoints = new ArrayList<ArrayList
                 <Object>>();
+
         // Get points hit that belong to same ship.
         for (ArrayList<Object> pointHit : pointsTargeted)
         {
-            System.out.printf("Point hit: %s\n", pointHit.get(0));
             // If point belongs to specified ship.
-
             if (pointHit.get(0).equals(name))
             {
-                System.out.printf("Name of ship's point: %s\n",
-                        pointHit.get(0));
                 shipPoints.add(pointHit);
             }
         }
-
         // Will be at least two points that belong to that ship.
         ArrayList<Object> firstPoint = shipPoints.get(0);
         ArrayList<Object> secondPoint = shipPoints.get(1);
-        System.out.printf("First point: %s %d %d\n", firstPoint.get(0),
-                firstPoint.get(1), firstPoint.get(2));
-        System.out.printf("Second point: %s %d %d\n", secondPoint.get(0),
-                secondPoint.get(1), secondPoint.get(2));
 
         // If their row values agree, then horizontal direction.
         if (firstPoint.get(1) == secondPoint.get(1))
         {
-            System.out.printf("Agree on row: %s\n", firstPoint.get(1));
             toReturn = "Horizontal";
         }
         // Else if column values agree, then vertical direction.
         else if (firstPoint.get(2) == secondPoint.get(2))
         {
-            System.out.printf("Agree on col: %s\n", firstPoint.get(2));
             toReturn = "Vertical";
         }
-        System.out.printf("Direction: %s\n", toReturn);
         return toReturn;
     }
 
+    /**
+     * Removes errant points from stack after finding out direction.
+     *
+     * @param row       successful shot's row
+     * @param col       successful shot's col
+     * @param direction direction ship is lying in
+     */
     private void updateStack(int row, int col, String direction)
     {
-        System.out.printf("row, col, direction: %d, %d, %s\n",
-                row, col, direction);
-
         // Use iterator to remove elements from stack whilst iterating.
         Iterator<ShipPoint> iter = possibleHits.iterator();
 
@@ -468,12 +487,11 @@ public class Computer
             {
                 ShipPoint point = iter.next();
                 /*
-                 * If ship going horizontally, remove all non-vertical
+                 * If ship going vertically, remove all non-vertical
                  * points that belong to that ship.
                  */
                 if (point.getCol() != col)
                 {
-                    System.out.println("Removing horizontal point");
                     iter.remove();
                 }
             }
@@ -489,13 +507,46 @@ public class Computer
                  */
                 if (point.getRow() != row)
                 {
-                    System.out.println("Removing vertical point");
                     iter.remove();
                 }
             }
         }
     }
 
+    /**
+     * Ship sunk so update lists and see if need to update parity.
+     *
+     * @param name sunk ship's name
+     */
+    private void updateOnSunkShip(String name)
+    {
+        shipsSunk.add(name);
+        shipsTargeted.remove(name);
+
+        /*
+         * Remove all the points of that ship from list.
+         * Use an iterator to avoid a concurrent modification
+         * exception (caused by removing items from an arrayList
+         * while iterating through it).
+         */
+        Iterator<ArrayList<Object>> iter = pointsTargeted.iterator();
+
+        while (iter.hasNext())
+        {
+            ArrayList<Object> point = iter.next();
+            if (point.get(0).equals(name))
+            {
+                iter.remove();
+            }
+        }
+        // Reset direction since ship sunk.
+        direction = "";
+        updateParity();
+    }
+
+    /**
+     * Update parity based on ships sunk.
+     */
     private void updateParity()
     {
         switch (parity)
@@ -540,24 +591,22 @@ public class Computer
                 break;
             }
         }
-        System.out.printf("Parity is now: %d\n", parity);
     }
 
 	/**
-	 * Pushes onto stack the points around origin that are legal and not yet attempted.
+	 * Pushes onto stack the points around origin hit that are legal and not
+     * yet attempted.
 	 * 
 	 * @param originPoint the point that was hit
+     * @param direction   direction of ship if known
 	 */
 	private void addPointsAround(ShipPoint originPoint, String direction)
 	{
 		int originRow = originPoint.getRow();
 		int originCol = originPoint.getCol();
 		ShipPoint currPoint;
-
         int newRow;
         int newCol;
-
-        System.out.printf("Direction: %s\n", direction);
 
 		/*
 		 * North.
@@ -566,16 +615,15 @@ public class Computer
 		 */
 		if (originRow != 0 && !direction.equals("Horizontal"))
 		{
-            System.out.println("Adding north point");
             newRow = originRow-1;
             // Placeholder type; would be cheating to look at real type.
             currPoint = new ShipPoint('N', newRow,
                     originCol);
-			/* Make sure haven't already shot there. */
+			// Make sure haven't already shot there.
             if (rawBoard[newRow][originCol] != 'X' &&
                     rawBoard[newRow][originCol] != 'O')
             {
-				/* Push to stack then. */
+				// Push to stack then.
                 possibleHits.push(currPoint);
             }
 		}
@@ -586,65 +634,41 @@ public class Computer
 		 */
 		if (originCol != 0 && !direction.equals("Vertical"))
 		{
-            System.out.println("Adding west point");
             newCol = originCol - 1;
             // Placeholder type; would be cheating to look at real type.
 			currPoint = new ShipPoint('W', originRow,
                     newCol);
-			/* Make sure haven't already shot there. */
+			// Make sure haven't already shot there.
             if (rawBoard[originRow][newCol] != 'X' &&
                     rawBoard[originRow][newCol] != 'O')
             {
-				/* Push to stack then. */
+				// Push to stack then.
                 possibleHits.push(currPoint);
             }
 		}
 		// South.
 		if (originRow != 9 && !direction.equals("Horizontal"))
 		{
-            System.out.println("Adding south point");
             newRow = originRow + 1;
-            // Placeholder type; would be cheating to look at real type.
 			currPoint = new ShipPoint('T', newRow, originCol);
-			/* Make sure haven't already shot there. */
+			// Make sure haven't already shot there.
             if (rawBoard[newRow][originCol] != 'X' &&
                     rawBoard[newRow][originCol] != 'O')
 			{
-				/* Push to stack then. */
 				possibleHits.push(currPoint);
 			}
 		}
 		// East.
 		if (originCol != 9 && !direction.equals("Vertical"))
 		{
-            System.out.println("Adding east point");
             newCol = originCol + 1;
-            // Placeholder type; would be cheating to look at real type.
 			currPoint = new ShipPoint('E', originRow, newCol);
-			/* Make sure haven't already shot there. */
+			// Make sure haven't already shot there.
             if (rawBoard[originRow][newCol] != 'X' &&
                     rawBoard[originRow][newCol] != 'O')
             {
-				/* Push to stack then. */
                 possibleHits.push(currPoint);
             }
 		}
 	}
-    // Use parity. Increase parity when all ships with that parity have been
-    // sunk. For example, if parity is at 3 (search within every 3rd square),
-    // and both 3-size ships have been sunk, parity goes up to 4 because only
-    // the 4-ship and 5-ship can be left.
-
-    /*
-     * Parity starts at 2. Get a random index and search within the array
-     * associated with that board (don't delete board elements in array,
-     * they'll already be marked as searched). Keep going until hit a ship.
-     * When hit a ship, get what ship it was, and add to stack until that
-     * specific ship has been sunk, and continue until all ships hit have
-     * been sunk. Increment parity if a ship sunk had size equal to it
-     * (unless 3 parity, b/c then need to have sunk both 3-ships). Then
-     * discard the stack and start over with hunt phase using new parity
-     * board if necessary.
-     */
-
 }

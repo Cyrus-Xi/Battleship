@@ -6,14 +6,16 @@
  * To build and run from command line:
  * 	Be in project root directory (above src and bin).
  * 	To compile: 
- * 		javac -Xlint -d bin src/battleship/*.java
+ * 		Type: javac -Xlint -d bin src/battleship/*.java
  * 		("battleship" is the package name. To maintain Eclipse's bin & src
  * 		distinction, this compiles all the .java files in src/battleship and
  * 		then puts the .class files into the bin directory.)
- * 	To run: 
- * 		java -cp bin battleship.Game
- * 		(This first temporarily sets classpath to bin folder and then runs the
- * 		Game class in the battleship package.
+ * 	To run:
+ * 	    Uncomment this line -- fname = "src/" + fname; -- in GameBoard class.
+ * 	    Type: java -cp bin battleship.Game
+ * 		(This first gets the right ships.txt file, then temporarily sets
+ * 		classpath to bin folder and runs the Game class in the battleship
+ * 		package.)
  */
 
 package battleship;
@@ -22,11 +24,17 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Represents a Battleship Game object.
+ * Represents a Battleship game.
  */
 public class Game 
 {
+    /**
+     * Reads console input from user.
+     */
 	static Scanner reader = new Scanner(System.in);
+    /**
+     * The Computer player.
+     */
 	static Computer computer;
 
     /**
@@ -34,12 +42,19 @@ public class Game
      *
      * @throws FileNotFoundException if no initial AI ships text file
      */
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws FileNotFoundException
+    {
         // true because first playthrough of game.
 		playGame(true);
 	}
 
-    static private void playGame(Boolean firstTime) throws FileNotFoundException
+    /**
+     * The main game loop.
+     *
+     * @param firstTime              true if first game
+     * @throws FileNotFoundException if no initial AI ships text file
+     */
+    private static void playGame(Boolean firstTime) throws FileNotFoundException
     {
         GameBoard computerGameBoard;
         GameBoard playerGameBoard;
@@ -75,10 +90,13 @@ public class Game
         }
         else if (playerGameBoard.areNoShipsLeft())
         {
-            System.out.println("\nSorry, the computer has beaten you. Better luck next time!");
+            System.out.println("\nSorry, the computer has beaten you. " +
+                    "Better luck next time!");
         }
 
-        System.out.printf("\nDo you want to play again? Enter %s or %s: ", "Y", "N");
+        // Find out if user wants to play again.
+        System.out.printf("\nDo you want to play again? Enter %s " +
+                "or %s: ", "Y", "N");
         char response = reader.next().charAt(0);
         if (response == 'Y' || response == 'y')
         {
@@ -92,10 +110,16 @@ public class Game
         }
     }
 
-    static private void customizeBoard(GameBoard board, GameBoard ai)
+    /**
+     * Lets user customize their board's ship placement.
+     *
+     * @param board human player's board to be customized
+     * @param ai    AI's board
+     */
+    private static void customizeBoard(GameBoard board, GameBoard ai)
     {
-        String[] shipNames = new String[] {"Carrier", "Battleship", "Cruiser",
-                "Submarine", "Destroyer"};
+        String[] shipNames = new String[] {"Carrier", "Battleship",
+                "Cruiser", "Submarine", "Destroyer"};
         char[] types = new char[] {'A', 'B', 'C', 'S', 'D'};
         int[] sizes = new int[] {5, 4, 3, 3, 2};
         String dirs = "NWSE";
@@ -106,16 +130,21 @@ public class Game
         char col;
         char dir;
 
-        for (int i = 0; i < 5; ++i) {
+        // Loop through ships to be placed.
+        for (int i = 0; i < 5; ++i)
+        {
             outputGameBoards(board, ai);
             System.out.println("\nFor your " + shipNames[i] + " -- ");
-            /* Loop until user enters legal coordinates for his/her shot. */
-            while (true) {
+            // Loop until user enters legal coordinates for his/her shot.
+            while (true)
+            {
                 System.out.print("Enter the row number of its \"origin\" " +
                         "point: ");
-                try {
+                try
+                {
                     row = reader.nextInt();
-                    if (row < 1 || row > 10) {
+                    if (row < 1 || row > 10)
+                    {
                         System.out.println("Please enter a number between " +
                                 "1 and 10.\n");
                         continue;
@@ -124,25 +153,33 @@ public class Game
                             "point: ");
 				    // Because there's no Scanner.nextChar method.
                     col = reader.next().charAt(0);
-				    // Allow lowercase cols to be inputted while keeping
-				    // uppercase for program logic.
+				    /*
+				     * Allow lowercase cols to be inputted while keeping
+				     * uppercase for program logic.
+				     */
                     col = Character.toString(col).toUpperCase().charAt(0);
 
-				    // Column letter inputted is legal.
-                    if (legalCols.contains(Character.toString(col))) {
+				    // Column letter input is legal.
+                    if (legalCols.contains(Character.toString(col)))
+                    {
                         System.out.printf("Enter the direction to place your" +
                                 " %s in (N, W, S, E): ", shipNames[i]);
                         dir = reader.next().charAt(0);
                         dir = Character.toString(dir).toUpperCase().charAt(0);
 
-                        if (dirs.contains(Character.toString(dir))) {
+                        // Check that direction is legal.
+                        if (dirs.contains(Character.toString(dir)))
+                        {
+                            // Try placing ship.
                             if (board.placePoints(row-1, cols.indexOf(col),
                                     dirs.indexOf(dir), sizes[i], types[i]))
                             {
+                                // It worked.
                                 break;
                             }
                             else
                             {
+                                // Didn't work; tell user to try again.
                                 System.out.println("Your ship placement " +
                                         "interferes with other ships' " +
                                         "placement or goes off the board. " +
@@ -157,12 +194,11 @@ public class Game
                                     "E). Starting over.\n");
                         }
                     }
-				/* Else, have user try again. */
+				    // Else, have user try again.
                     else
                     {
                         System.out.println("Please enter a legal column " +
                                 "letter. Starting over.\n");
-                        continue;
                     }
                 }
                 // User didn't enter an int for the row. Have user try again.
@@ -175,6 +211,7 @@ public class Game
                 }
             }
         }
+        // Instantiate ship objects from board.
         board.setUpShips();
     }
 	
@@ -187,13 +224,13 @@ public class Game
 	static void playOneTurn(GameBoard ofHuman, GameBoard ofComputer)
 	{
 		outputGameBoards(ofHuman, ofComputer);
-		outputShips(ofHuman, ofComputer);
+		outputShips(ofHuman);
 
         String legalCols = "ABCDEFGHIJ";
 		int row;
 		char col;
 		
-		/* Loop until user enters legal coordinates for his/her shot. */
+		// Loop until user enters legal coordinates for his/her shot.
 		while(true)
 		{
 			System.out.print("Enter the row number to shoot at: ");
@@ -208,31 +245,32 @@ public class Game
 				}
 				
 				System.out.print("Enter the column letter to shoot at: ");
-				
-				/* Because there's no Scanner.nextChar method. */
 				col = reader.next().charAt(0);
-				
-				/* Allow lowercase columns to be inputted while keeping uppercase for program logic. */
+
+                /*
+				 * Allow lowercase columns to be inputted while keeping
+				 * uppercase for program logic.
+				 */
 				col = Character.toString(col).toUpperCase().charAt(0);
 				
-				/* Column letter inputted is legal. */
+				// Column letter input is legal.
 				if (legalCols.contains(Character.toString(col)))
 				{
 					break;
 				}
-				/* Else, have user try again. */
+				// Else, have user try again.
 				else
 				{
-					System.out.println("Please enter a legal column letter. Starting over.\n");
-					continue;
-				}
+					System.out.println("Please enter a legal column letter. " +
+                            "Starting over.\n");
+                }
 			}
-			/* User didn't enter an int for the row. Have user try again. */
+			// User didn't enter an int for the row. Have user try again.
 			catch (InputMismatchException e)
 			{
 				System.out.println("Please enter a legal row number.\n");
 				
-				/* Consume the invalid token. Otherwise infinite loop results. */
+				// Consume the invalid token. Otherwise infinite loop.
 				reader.next();  
 			}
 		}
@@ -259,13 +297,12 @@ public class Game
 		String[] ofComputerLines = ofComputer.toString().split("\\r?\\n");
 		
 		String temp;
-		
-		
+
 		// Hide the computer's ships from player. 
 		for (int i = 1; i < ofComputerLines.length; ++i)
 		{
 			temp = ofComputerLines[i];
-			//Use regex to replace each ship point marker with an empty space.
+			// Use regex to replace each ship point marker with an empty space.
 			ofComputerLines[i] = temp.replaceAll("[ABCDS]+?", " ");
 		}
 	
@@ -273,23 +310,20 @@ public class Game
 		
 		for (int lineIndex = 0; lineIndex < ofComputerLines.length; ++lineIndex) 
 		{
-			/* Print line by line. */
+			// Print line by line.
 			System.out.printf("%-20s%-20s\n", ofHumanLines[lineIndex], 
-											ofComputerLines[lineIndex]);
+		            ofComputerLines[lineIndex]);
 		}
 	}
 	
 	/**
-	 * Output each board's extant ships / ship points.
+	 * Output human player's extant ships / ship points.
 	 * 
 	 * @param ofHuman    human player's game board
-	 * @param ofComputer computer's game board
 	 */
-	static void outputShips(GameBoard ofHuman, GameBoard ofComputer)
+	static void outputShips(GameBoard ofHuman)
 	{
 		System.out.println("\nYour ships:");
 		System.out.println(ofHuman.getShips());
-		//System.out.println("Computer's ships:");
-		//System.out.println(ofComputer.getShips());
 	}
 }
