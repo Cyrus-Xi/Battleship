@@ -16,31 +16,17 @@ import java.io.*;
 public class GameBoard 
 {
     /**
-     * 10 rows.
-     */
-	int numRows = 10;
-    /**
-     * 10 columns.
-     */
-	int numColumns = 10;
-    /**
-     * Actual primitive board is a 2D char array.
+     * Actual primitive board is a 2D 10x10 char array.
      */
 	char[][] board;
+    int numRows = 10;
+    int numColumns = 10;
 
     /**
-     * 5 ships.
+     * 5 ships that take up 17 points.
      */
 	int NUM_SHIPS = 5;
-    /**
-     * The 5 ships take up 17 ship points.
-     */
 	int NUM_SHIP_POINTS = 17;
-	
-	/* 
-	 * Use ArrayLists instead of raw arrays to easily add to end of list. 
-	 * Don't need to keep track of index.
-	 */
 
     /**
      * Array of ShipPoints.
@@ -53,24 +39,12 @@ public class GameBoard
 	ArrayList<Ship> ships = new ArrayList<Ship>(5);
 
     /**
-     * Array of ShipPoints that represents a carrier.
+     * Array of ShipPoints to represent each ship.
      */
 	ArrayList<ShipPoint> rawCarrier = new ArrayList<ShipPoint>(5);
-    /**
-     * Array of ShipPoints that represents a battleship.
-     */
 	ArrayList<ShipPoint> rawBattleship = new ArrayList<ShipPoint>(4);
-    /**
-     * Array of ShipPoints that represents a cruiser.
-     */
 	ArrayList<ShipPoint> rawCruiser = new ArrayList<ShipPoint>(3);
-    /**
-     * Array of ShipPoints that represents a submarine.
-     */
 	ArrayList<ShipPoint> rawSubmarine = new ArrayList<ShipPoint>(3);
-    /**
-     * Array of ShipPoints that represents a destroyer.
-     */
 	ArrayList<ShipPoint> rawDestroyer = new ArrayList<ShipPoint>(2);
 	
 	/**

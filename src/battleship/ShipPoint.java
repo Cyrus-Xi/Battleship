@@ -13,12 +13,9 @@ package battleship;
 public class ShipPoint
 {
     /**
-     * The row value of the point.
+     * The row & col value of the point.
      */
 	int row;
-    /**
-     * The col value of the point.
-     */
 	int col;
     /**
      * The char ship type that the point is.

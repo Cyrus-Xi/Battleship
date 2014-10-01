@@ -14,28 +14,23 @@ import java.util.*;
  */
 public class Computer
 {
-    /*
-     * Have it store human player's game board.
-     * Though the board will have the player's ship placement, the computer
-     * will not, of course, actually use that information in its strategy (i.e.,
-     * where it chooses to shoot each turn).
-     */
-
     /**
      * Human player's board.
+     * <p>
+     * Though the board will have the player's ship placement, the computer
+     * will not, of course, actually use that information in its strategy.
      */
     GameBoard ofOpponent;
+
     /**
      * The primitive/actual board.
      */
     char [][] rawBoard;
+
     /**
-     * Row of point to be shot at.
+     * Row & col of point to be shot at.
      */
     int row;
-    /**
-     * Col of point to be shot at.
-     */
     int col;
 
     /**
