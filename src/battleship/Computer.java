@@ -14,29 +14,29 @@ import java.util.*;
  */
 public class Computer
 {
-	/* 
-	 * Have it store human player's game board.
-	 * Though the board will have the player's ship placement, the computer
-	 * will not, of course, actually use that information in its strategy (i.e., 
-	 * where it chooses to shoot each turn).
-	 */
+    /*
+     * Have it store human player's game board.
+     * Though the board will have the player's ship placement, the computer
+     * will not, of course, actually use that information in its strategy (i.e.,
+     * where it chooses to shoot each turn).
+     */
 
     /**
      * Human player's board.
      */
-	GameBoard ofOpponent;
+    GameBoard ofOpponent;
     /**
      * The primitive/actual board.
      */
-	char [][] rawBoard;
+    char [][] rawBoard;
     /**
      * Row of point to be shot at.
      */
-	int row;
+    int row;
     /**
      * Col of point to be shot at.
      */
-	int col;
+    int col;
 
     /**
      * The spacing of shots. E.g., when parity is 2, list of points to be
@@ -119,7 +119,7 @@ public class Computer
      * ship it has hit. The other phase is the "Hunt" one where the AI tries
      * to find a ship.
      */
-	Stack<ShipPoint> possibleHits = new Stack<ShipPoint>();
+    Stack<ShipPoint> possibleHits = new Stack<ShipPoint>();
 
     /**
      * Ships that the AI has sunk.
@@ -145,30 +145,30 @@ public class Computer
     /**
      * To convert random col to column letter.
      */
-	char[] columnHeaders = "ABCDEFGHIJ".toCharArray();
-	
-	/**
-	 * Very simple Computer constructor.
-	 * 
-	 * @param ofHuman human player's game board
-	 */
-	public Computer(GameBoard ofHuman)
-	{
-		ofOpponent = ofHuman;
+    char[] columnHeaders = "ABCDEFGHIJ".toCharArray();
+
+    /**
+     * Very simple Computer constructor.
+     *
+     * @param ofHuman human player's game board
+     */
+    public Computer(GameBoard ofHuman)
+    {
+        ofOpponent = ofHuman;
         rawBoard = ofOpponent.getBoard();
-	}
-	
-	/**
-	 * Computer plays its turn.
-	 * 
-	 * @param ofHuman human player's game board
-	 */
-	public void playOneTurn(GameBoard ofHuman){
-		ofOpponent = ofHuman;
+    }
+
+    /**
+     * Computer plays its turn.
+     *
+     * @param ofHuman human player's game board
+     */
+    public void playOneTurn(GameBoard ofHuman){
+        ofOpponent = ofHuman;
 
         // Update board each turn.
         rawBoard = ofOpponent.getBoard();
-		ShipPoint currPoint;
+        ShipPoint currPoint;
 
         String message;
         char type;
@@ -186,16 +186,16 @@ public class Computer
             setRandomShot(parityBoard);
         }
         // Else use stack of possible hits (like a depth-based search).
-		else
-		{
-			currPoint = possibleHits.pop();
-			row = currPoint.getRow();
-			col = currPoint.getCol();
-		}
-		type = rawBoard[row][col];
+        else
+        {
+            currPoint = possibleHits.pop();
+            row = currPoint.getRow();
+            col = currPoint.getCol();
+        }
+        type = rawBoard[row][col];
 
         // Get information about shot.
-		message = ofOpponent.updateBoardAfterShot(false, row+1,
+        message = ofOpponent.updateBoardAfterShot(false, row+1,
                 columnHeaders[col]);
 
         // If shot was a hit (non-empty message).
@@ -237,7 +237,7 @@ public class Computer
             ShipPoint shipPointLeft = new ShipPoint('Z', rowLeft, colLeft);
             addPointsAround(shipPointLeft, direction);
         }
-	}
+    }
 
     /**
      * Depending on the parity, get the right 2d array to use.
@@ -280,18 +280,18 @@ public class Computer
         // Shoot randomly using appropriate parity board if nothing on stack.
         if (possibleHits.empty())
         {
-			/*
-			 * Loop until get random index that results in row & col values
-			 * that represent a point not yet shot at.
-			 */
+            /*
+             * Loop until get random index that results in row & col values
+             * that represent a point not yet shot at.
+             */
             while (true)
             {
                 rand = new Random();
                 int max = pBoard.length;
                 /*
-				 * Exclusive of max value, which is what we want since we're
-				 * using the array's length as max.
-				 */
+                 * Exclusive of max value, which is what we want since we're
+                 * using the array's length as max.
+                 */
                 boardIndex = rand.nextInt(max);
                 row = pBoard[boardIndex][0];
                 col = pBoard[boardIndex][1];
@@ -593,82 +593,82 @@ public class Computer
         }
     }
 
-	/**
-	 * Pushes onto stack the points around origin hit that are legal and not
+    /**
+     * Pushes onto stack the points around origin hit that are legal and not
      * yet attempted.
-	 * 
-	 * @param originPoint the point that was hit
+     *
+     * @param originPoint the point that was hit
      * @param direction   direction of ship if known
-	 */
-	private void addPointsAround(ShipPoint originPoint, String direction)
-	{
-		int originRow = originPoint.getRow();
-		int originCol = originPoint.getCol();
-		ShipPoint currPoint;
+     */
+    private void addPointsAround(ShipPoint originPoint, String direction)
+    {
+        int originRow = originPoint.getRow();
+        int originCol = originPoint.getCol();
+        ShipPoint currPoint;
         int newRow;
         int newCol;
 
-		/*
-		 * North.
-		 * Can't go north if at top row already.
-		 * And don't go north if ship is going horizontally.
-		 */
-		if (originRow != 0 && !direction.equals("Horizontal"))
-		{
+        /*
+         * North.
+         * Can't go north if at top row already.
+         * And don't go north if ship is going horizontally.
+         */
+        if (originRow != 0 && !direction.equals("Horizontal"))
+        {
             newRow = originRow-1;
             // Placeholder type; would be cheating to look at real type.
             currPoint = new ShipPoint('N', newRow,
                     originCol);
-			// Make sure haven't already shot there.
+            // Make sure haven't already shot there.
             if (rawBoard[newRow][originCol] != 'X' &&
                     rawBoard[newRow][originCol] != 'O')
             {
-				// Push to stack then.
+                // Push to stack then.
                 possibleHits.push(currPoint);
             }
-		}
-		/*
-		 * West.
-		 * Can't go west if at leftmost col already.
-		 * And don't go west if ship is going vertically.
-		 */
-		if (originCol != 0 && !direction.equals("Vertical"))
-		{
+        }
+        /*
+         * West.
+         * Can't go west if at leftmost col already.
+         * And don't go west if ship is going vertically.
+         */
+        if (originCol != 0 && !direction.equals("Vertical"))
+        {
             newCol = originCol - 1;
             // Placeholder type; would be cheating to look at real type.
-			currPoint = new ShipPoint('W', originRow,
+            currPoint = new ShipPoint('W', originRow,
                     newCol);
-			// Make sure haven't already shot there.
+            // Make sure haven't already shot there.
             if (rawBoard[originRow][newCol] != 'X' &&
                     rawBoard[originRow][newCol] != 'O')
             {
-				// Push to stack then.
+                // Push to stack then.
                 possibleHits.push(currPoint);
             }
-		}
-		// South.
-		if (originRow != 9 && !direction.equals("Horizontal"))
-		{
+        }
+        // South.
+        if (originRow != 9 && !direction.equals("Horizontal"))
+        {
             newRow = originRow + 1;
-			currPoint = new ShipPoint('T', newRow, originCol);
-			// Make sure haven't already shot there.
+            currPoint = new ShipPoint('T', newRow, originCol);
+            // Make sure haven't already shot there.
             if (rawBoard[newRow][originCol] != 'X' &&
                     rawBoard[newRow][originCol] != 'O')
-			{
-				possibleHits.push(currPoint);
-			}
-		}
-		// East.
-		if (originCol != 9 && !direction.equals("Vertical"))
-		{
+            {
+                possibleHits.push(currPoint);
+            }
+        }
+        // East.
+        if (originCol != 9 && !direction.equals("Vertical"))
+        {
             newCol = originCol + 1;
-			currPoint = new ShipPoint('E', originRow, newCol);
-			// Make sure haven't already shot there.
+            currPoint = new ShipPoint('E', originRow, newCol);
+            // Make sure haven't already shot there.
             if (rawBoard[originRow][newCol] != 'X' &&
                     rawBoard[originRow][newCol] != 'O')
             {
                 possibleHits.push(currPoint);
             }
-		}
-	}
+        }
+    }
 }
