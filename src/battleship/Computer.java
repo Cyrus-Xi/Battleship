@@ -27,6 +27,9 @@ public class Computer
      */
     char [][] rawBoard;
 
+    // 10x10 board.
+    BoardSpace [][] boardSpaces = new BoardSpace [10][10];
+
     /**
      * Row & col of point to be shot at.
      */
@@ -151,6 +154,15 @@ public class Computer
     {
         ofOpponent = ofHuman;
         rawBoard = ofOpponent.getBoard();
+
+        // Initialize boardSpaces with right row & col values.
+        for (int i = 0; i < 10; ++i)
+        {
+            for (int j = 0; j < 10; ++j)
+            {
+                boardSpaces[i][j] = new BoardSpace(i, j);
+            }
+        }
     }
 
     /**
@@ -163,6 +175,7 @@ public class Computer
 
         // Update board each turn.
         rawBoard = ofOpponent.getBoard();
+        setSpaceCounts();
         ShipPoint currPoint;
 
         String message;
@@ -178,7 +191,7 @@ public class Computer
         // ships) so get random row & col values for shot.
         if (possibleHits.isEmpty())
         {
-            setRandomShot(parityBoard);
+            setHuntShot(parityBoard);
         }
         // Else use stack of possible hits (like a depth-based search).
         else
@@ -234,6 +247,122 @@ public class Computer
         }
     }
 
+    private void setSpaceCounts()
+    {
+        // Clear counters.
+        for (int i = 0; i < 10; ++i)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                boardSpaces[i][j].clearCounter();
+            }
+        }
+
+        boolean isPlaceable;
+        // Ship sizes from biggest to smallest.
+        int[] sizes = {5, 4, 3, 3, 2};
+        // Try to place each ship first horizontally then vertically.
+
+        // Horizontal placing. i = row index.
+        for (int i = 0; i < 10; ++i)
+        {
+            // For each ship to be placed.
+            for (int k = 0; k < 5; ++k)
+            {
+                // Keep going until go out of bounds. Last legal column index
+                // is equivalent to 10 - sizes[k].
+                for (int realJ = 0; realJ < 10 - sizes[k]; ++realJ)
+                {
+                    int tempJ = realJ;
+                    // And thus whether must increment space counters.
+                    isPlaceable = true;
+                    // Go for the length of the current ship to be "placed."
+                    for (int p = 0; p < sizes[k]; ++p, tempJ++)
+                    {
+                        /*
+                         * An 'X' is also just an obstruction because since
+                         * stack is empty, that ship has already been sunk.
+                         */
+                        if ((rawBoard[i][tempJ] == 'X') ||
+                                (rawBoard[i][tempJ] == 'O'))
+                        {
+                            isPlaceable = false;
+                            break;
+                        }
+
+//                        /*
+//                         * Trying to finish a ship or ships off.
+//                         * Give heavy weighting to possible ship placings
+//                         * that go through successful hits.
+//                         */
+//                        else
+//                        {
+//
+//                        }
+                    }
+                    // If can place ship over spaces, increment their counters.
+                    if (isPlaceable)
+                    {
+                        // Reset tempJ.
+                        tempJ = realJ;
+                        for (int q = 0; q < sizes[k]; ++q, tempJ++)
+                        {
+                            boardSpaces[i][tempJ].incrementCounter();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Symmetrical to horizontal placing because board is square.
+        // Vertical placing. i = col index.
+        for (int i = 0; i < 10; ++i)
+        {
+            // For each ship to be placed.
+            for (int k = 0; k < 5; ++k)
+            {
+                // Keep going until go out of bounds. Last legal column index
+                // is equivalent to 10 - sizes[k].
+                for (int realJ = 0; realJ < 10 - sizes[k]; ++realJ)
+                {
+                    int tempJ = realJ;
+                    // And thus whether must increment space counters.
+                    isPlaceable = true;
+                    // Go for the length of the current ship to be "placed."
+                    for (int p = 0; p < sizes[k]; ++p, tempJ++)
+                    {
+                        if ((rawBoard[tempJ][i] == 'X') ||
+                                (rawBoard[tempJ][i] == 'O'))
+                        {
+                            isPlaceable = false;
+                            break;
+                        }
+                    }
+                    // If can place ship over spaces, increment their counters.
+                    if (isPlaceable)
+                    {
+                        // Reset tempJ.
+                        tempJ = realJ;
+                        for (int q = 0; q < sizes[k]; ++q, tempJ++)
+                        {
+                            boardSpaces[tempJ][i].incrementCounter();
+                        }
+                    }
+                }
+            }
+        }
+        // Print counters.
+        System.out.println("Counters:\n");
+        for (int i = 0; i < 10; ++i)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                System.out.print(boardSpaces[i][j]);
+            }
+            System.out.println();
+        }
+    }
+
     /**
      * Depending on the parity, get the right 2d array to use.
      *
@@ -267,36 +396,31 @@ public class Computer
      *
      * @param pBoard parity board to be used in getting random point
      */
-    private void setRandomShot(int[][] pBoard)
+    private void setHuntShot(int[][] pBoard)
     {
-        Random rand;
-        int boardIndex;
-
-        // Shoot randomly using appropriate parity board if nothing on stack.
-        if (possibleHits.empty())
+        ArrayList<BoardSpace> flatList = new ArrayList<BoardSpace>();
+        for (int i = 0; i < 10; ++i)
         {
-            /*
-             * Loop until get random index that results in row & col values
-             * that represent a point not yet shot at.
-             */
-            while (true)
+            for (BoardSpace space : boardSpaces[i])
             {
-                rand = new Random();
-                int max = pBoard.length;
-                /*
-                 * Exclusive of max value, which is what we want since we're
-                 * using the array's length as max.
-                 */
-                boardIndex = rand.nextInt(max);
-                row = pBoard[boardIndex][0];
-                col = pBoard[boardIndex][1];
-
-                // If haven't shot there yet, exit loop.
-                if (rawBoard[row][col] != 'X' && rawBoard[row][col] != 'O')
-                {
-                    break;
-                }
+                flatList.add(space);
             }
+        }
+        /*
+         * Sort in descending order based on counter.
+         * Now the space with the highest counter is at the beginning.
+         */
+        Collections.sort(flatList, Collections.reverseOrder());
+
+        row = flatList.get(0).getRow();
+        col = flatList.get(0).getCol();
+
+        int index = 1;
+        while ((rawBoard[row][col] == 'X') || (rawBoard[row][col] == 'O'))
+        {
+            row = flatList.get(index).getRow();
+            col = flatList.get(index).getCol();
+            index++;
         }
     }
 
