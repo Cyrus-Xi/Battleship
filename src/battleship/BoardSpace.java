@@ -15,13 +15,18 @@ public class BoardSpace implements Comparable<BoardSpace>
     /**
      * Row & col values for space.
      */
-    int row;
-    int col;
+    private int row;
+    private int col;
 
     /**
      * The number of possible ships that could be placed through this space.
      */
-    int counter;
+    private int counter;
+
+    /**
+     * The sum of neighboring (in cardinal directions) BoardSpace counters.
+     */
+    private int neighboringSum;
 
     /**
      * Simple gameboard space constructor.
@@ -81,6 +86,24 @@ public class BoardSpace implements Comparable<BoardSpace>
         counter = 0;
     }
 
+    public int getNeighboringSum()
+    {
+        return neighboringSum;
+    }
+
+    public void setNeighboringSum(int sum)
+    {
+        neighboringSum = sum;
+    }
+
+    /**
+     * Reset neighboring sum value to 0.
+     */
+    public void clearNeighboringSum()
+    {
+        neighboringSum = 0;
+    }
+
     /**
      * Replaces default toString() with a much more reader-friendly version.
      *
@@ -111,15 +134,30 @@ public class BoardSpace implements Comparable<BoardSpace>
         }
 
         // Comparison based on counter.
-        if (this.counter < thatSpace.counter)
+        if (this.counter < thatSpace.getCounter())
         {
             return BEFORE;
         }
-        else if (this.counter > thatSpace.counter)
+        else if (this.counter > thatSpace.getCounter())
         {
             return AFTER;
         }
-
+        // Tiebreak based on neighboring sum.
+        else if (this.counter == thatSpace.getCounter())
+        {
+            if (this.neighboringSum < thatSpace.getNeighboringSum())
+            {
+                return BEFORE;
+            }
+            else if (this.neighboringSum > thatSpace.getNeighboringSum())
+            {
+                return AFTER;
+            }
+            else if (this.neighboringSum == thatSpace.getNeighboringSum())
+            {
+                return EQUAL;
+            }
+        }
        return EQUAL;
     }
 
@@ -144,7 +182,8 @@ public class BoardSpace implements Comparable<BoardSpace>
         else
         {
             BoardSpace thatSpace = (BoardSpace)that;
-            if (this.counter == thatSpace.counter)
+            if (this.counter == thatSpace.getCounter() && this.neighboringSum
+                    == thatSpace.getNeighboringSum())
             {
                 return true;
             }

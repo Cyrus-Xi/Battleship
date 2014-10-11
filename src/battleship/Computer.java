@@ -226,7 +226,7 @@ public class Computer
 
     private void setBoardSpaces(boolean isHorizontal)
     {
-        // Clear counters at the start of each turn.
+        // Reset boardSpace values at the start of each turn.
         if (isHorizontal)
         {
             for (int i = 0; i < 10; ++i)
@@ -234,6 +234,7 @@ public class Computer
                 for (int j = 0; j < 10; j++)
                 {
                     boardSpaces[i][j].clearCounter();
+                    boardSpaces[i][j].clearNeighboringSum();
                 }
             }
         }
@@ -371,7 +372,35 @@ public class Computer
      */
     private void setHuntShot()
     {
-        
+        for (int row = 0; row < 10; ++row)
+        {
+            for (int col = 0; col < 10; ++col)
+            {
+                BoardSpace curr = boardSpaces[row][col];
+                int sum = 0;
+                // Add north neighbor's counter.
+                if (row != 0)
+                {
+                    sum += boardSpaces[row-1][col].getCounter();
+                }
+                // East neighbor.
+                if (col != 9)
+                {
+                    sum += boardSpaces[row][col+1].getCounter();
+                }
+                // South neighbor.
+                if (row != 9)
+                {
+                    sum += boardSpaces[row+1][col].getCounter();
+                }
+                // West neighbor.
+                if (col != 0)
+                {
+                    sum += boardSpaces[row][col-1].getCounter();
+                }
+                curr.setNeighboringSum(sum);
+            }
+        }
 
         ArrayList<BoardSpace> flatList = new ArrayList<BoardSpace>();
         for (int i = 0; i < 10; ++i)
