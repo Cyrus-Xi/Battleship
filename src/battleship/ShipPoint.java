@@ -69,7 +69,7 @@ public class ShipPoint
             default:
             {
                 System.out.println("Something went wrong with the ship type. " +
-                        "Exiting");
+                        "Exiting.");
                 System.exit(1);
                 break;
             }

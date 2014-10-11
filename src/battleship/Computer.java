@@ -1,8 +1,41 @@
 /*
- * Author: Cyrus Xi
- * Purpose: This class represents the Computer player. It implements the 
- * 			"strategy" element.
- * Date: 09/20/14.
+ * Author:
+ *      Cyrus Xi
+ * Purpose:
+ *      This class represents the Computer player. It implements the
+ * 	    "strategy" element. Part of the algorithm is taken from here:
+ * 		http://www.datagenetics.com/blog/december32011/index.html
+ * Strategy details:
+ *      There are two phases to the Computer's strategy: the Hunt and the
+ *      Target phases. In the Hunt phase, the Computer is trying to hit a
+ *      ship. Once a ship has been hit, we are in the Target phase where
+ *      the Computer is trying to finish off and sink an opponent's ship
+ *      that has been struck.
+ *
+ *      During the Hunt phase, the Computer uses something like a
+ *      probability density function to calculate the most likely places
+ *      in which an enemy ship will be located. Each turn, the Computer
+ *      goes through the board (which, as the game continues, is increasingly
+ *      filled with misses and sunk ships) and tries to place each extant
+ *      ship in each board location, first horizontally then vertically. If the
+ *      ship can be placed (i.e., doesn't go off the board or through missed
+ *      shots or already sunk ships), then each BoardSpace in that placing
+ *      gets its counter attribute incremented by 1. The BoardSpace with the
+ *      highest counter value is the mostly likely spot for an enemy ship to
+ *      pass through.
+ *
+ *      When a ship has been struck, the Computer goes on to the Target
+ *      phase, which can also be loosely divided into two phases. In the
+ *      first mini-phase, the Computer does not know which direction the struck
+ *      ship is placed (horizontal or vertical) so it simply adds the four
+ *      cardinal direction points (or fewer depending on obstructions) around
+ *      the successful shot to a stack and pops the stack for the next shot.
+ *      Once two points of a ship have been hit, the Computer can determine the
+ *      direction of the ship and move on to the next mini-phase, which is
+ *      just the completion of the sinking of that ship based on its
+ *      now-known direction.
+ * Date:
+ *      09/20/14.
  */
 
 package battleship;
@@ -31,85 +64,24 @@ public class Computer
     BoardSpace [][] boardSpaces = new BoardSpace [10][10];
 
     /**
+     * The lengths of non-sunk ships.
+     * <p>
+     * Double brace initialization for simplicity.
+     */
+    ArrayList<Integer> extantShipLengths = new ArrayList<Integer>()
+    {{
+        add(5);
+        add(4);
+        add(3);
+        add(3);
+        add(2);
+    }};
+
+    /**
      * Row & col of point to be shot at.
      */
     int row;
     int col;
-
-    /**
-     * The spacing of shots. E.g., when parity is 2, list of points to be
-     * considered are those that are exactly 2 spaces apart.
-     */
-    int parity = 2;
-
-    /**
-     * At minimum (when destroyer not yet sunk), only need to search every
-     * "other" space because smallest ship is of size 2.
-     */
-    int [][] twoParityBoard = new int [][]
-        {
-            {0, 0}, {0, 2}, {0, 4}, {0, 6}, {0, 8},
-            {1, 1}, {1, 3}, {1, 5}, {1, 7}, {1, 9},
-            {2, 0}, {2, 2}, {2, 4}, {2, 6}, {2, 8},
-            {3, 1}, {3, 3}, {3, 5}, {3, 7}, {3, 9},
-            {4, 0}, {4, 2}, {4, 4}, {4, 6}, {4, 8},
-            {5, 1}, {5, 3}, {5, 5}, {5, 7}, {5, 9},
-            {6, 0}, {6, 2}, {6, 4}, {6, 6}, {6, 8},
-            {7, 1}, {7, 3}, {7, 5}, {7, 7}, {7, 9},
-            {8, 0}, {8, 2}, {8, 4}, {8, 6}, {8, 8},
-            {9, 1}, {9, 3}, {9, 5}, {9, 7}, {9, 9}
-        };
-
-    /**
-     * When destroyer sunk, only need to search every 3rd space.
-     */
-    int [][] threeParityBoard = new int [][]
-        {
-            {0, 0}, {0, 3}, {0, 6}, {0, 9},
-            {1, 1}, {1, 4}, {1, 7},
-            {2, 2}, {2, 5}, {2, 8},
-            {3, 0}, {3, 3}, {3, 6}, {3, 9},
-            {4, 1}, {4, 4}, {4, 7},
-            {5, 2}, {5, 5}, {5, 8},
-            {6, 0}, {6, 3}, {6, 6}, {6, 9},
-            {7, 1}, {7, 4}, {7, 7},
-            {8, 2}, {8, 5}, {8, 8},
-            {9, 0}, {9, 3}, {9, 6}, {9, 9},
-        };
-
-    /**
-     * When cruiser and submarine sunk, only need to search every 4th space.
-     */
-    int [][] fourParityBoard = new int [][]
-        {
-            {0, 0}, {0, 4}, {0, 8},
-            {1, 1}, {1, 5}, {1, 9},
-            {2, 2}, {2, 6},
-            {3, 3}, {3, 7},
-            {4, 0}, {4, 4}, {4, 8},
-            {5, 1}, {5, 5}, {5, 9},
-            {6, 2}, {6, 6},
-            {7, 3}, {7, 7},
-            {8, 0}, {8, 4}, {8, 8},
-            {9, 1}, {9, 5}, {9, 9},
-        };
-
-    /**
-     * When only carrier left, only need to search every 5th space.
-     */
-    int [][] fiveParityBoard = new int [][]
-        {
-            {0, 0}, {0, 5},
-            {1, 1}, {1, 6},
-            {2, 2}, {2, 7},
-            {3, 3}, {3, 8},
-            {4, 4}, {4, 9},
-            {5, 0}, {5, 5},
-            {6, 1}, {6, 6},
-            {7, 2}, {7, 7},
-            {8, 3}, {8, 8},
-            {9, 4}, {9, 9},
-        };
 
     /**
      * A stack of points to be shot at next after a successful shot.
@@ -122,7 +94,7 @@ public class Computer
     /**
      * Ships that the AI has sunk.
      */
-    ArrayList<String> shipsSunk = new ArrayList<String>();
+    //ArrayList<String> shipsSunk = new ArrayList<String>();
 
     /**
      * Ships currently being targeted.
@@ -175,7 +147,12 @@ public class Computer
 
         // Update board each turn.
         rawBoard = ofOpponent.getBoard();
-        setSpaceCounts();
+        for (Integer item : extantShipLengths)
+        {
+            System.out.print(item);
+        }
+        // Set counts "horizontally" first.
+        setBoardSpaces(true);
         ShipPoint currPoint;
 
         String message;
@@ -185,13 +162,13 @@ public class Computer
         boolean sunk = false;
 
         // Get right board to be considered.
-        int[][] parityBoard = getRightBoard(parity);
+        //int[][] parityBoard = getRightBoard(parity);
 
         // No stack of possible hits (i.e., not trying to finish off hit
         // ships) so get random row & col values for shot.
         if (possibleHits.isEmpty())
         {
-            setHuntShot(parityBoard);
+            setHuntShot();
         }
         // Else use stack of possible hits (like a depth-based search).
         else
@@ -247,110 +224,80 @@ public class Computer
         }
     }
 
-    private void setSpaceCounts()
+    private void setBoardSpaces(boolean isHorizontal)
     {
-        // Clear counters.
-        for (int i = 0; i < 10; ++i)
+        // Clear counters at the start of each turn.
+        if (isHorizontal)
         {
-            for (int j = 0; j < 10; j++)
+            for (int i = 0; i < 10; ++i)
             {
-                boardSpaces[i][j].clearCounter();
+                for (int j = 0; j < 10; j++)
+                {
+                    boardSpaces[i][j].clearCounter();
+                }
             }
         }
 
         boolean isPlaceable;
-        // Ship sizes from biggest to smallest.
-        int[] sizes = {5, 4, 3, 3, 2};
         // Try to place each ship first horizontally then vertically.
 
-        // Horizontal placing. i = row index.
-        for (int i = 0; i < 10; ++i)
+        for (int row = 0; row < 10; ++row)
         {
             // For each ship to be placed.
-            for (int k = 0; k < 5; ++k)
+            for (int index = 0; index < extantShipLengths.size(); ++index)
             {
-                // Keep going until go out of bounds. Last legal column index
-                // is equivalent to 10 - sizes[k].
-                for (int realJ = 0; realJ < 10 - sizes[k]; ++realJ)
+                int length = extantShipLengths.get(index);
+                // Keep going until go out of bounds.
+                for (int col = 0; col < 10; ++col)
                 {
-                    int tempJ = realJ;
                     // And thus whether must increment space counters.
-                    isPlaceable = true;
-                    // Go for the length of the current ship to be "placed."
-                    for (int p = 0; p < sizes[k]; ++p, tempJ++)
+                    isPlaceable = isPlaceable(row, col, length, isHorizontal);
+                    // If can place ship over spaces, increment their counters.
+                    if (isPlaceable)
                     {
-                        /*
-                         * An 'X' is also just an obstruction because since
-                         * stack is empty, that ship has already been sunk.
-                         */
-                        if ((rawBoard[i][tempJ] == 'X') ||
-                                (rawBoard[i][tempJ] == 'O'))
-                        {
-                            isPlaceable = false;
-                            break;
-                        }
-
-//                        /*
-//                         * Trying to finish a ship or ships off.
-//                         * Give heavy weighting to possible ship placings
-//                         * that go through successful hits.
-//                         */
-//                        else
+                        setSpaceCounters(row, col, length, isHorizontal);
+                    }
+                }
+            }
+        }
+//        // Symmetrical to horizontal placing because board is square.
+//        // Vertical placing. i = col index.
+//        for (int i = 0; i < 10; ++i)
+//        {
+//            // For each ship to be placed.
+//            for (int k = 0; k < extantShipLengths.size(); ++k)
+//            {
+//                // Keep going until go out of bounds. Last legal column index
+//                // is equivalent to 10 - sizes[k].
+//                for (int j = 0; j <= (10 - extantShipLengths.get(k)); ++j)
+//                {
+//                    int temp = j;
+//                    // And thus whether must increment space counters.
+//                    isPlaceable = true;
+//                    // Go for the length of the current ship to be "placed."
+//                    for (int p = 0; p < extantShipLengths.get(k); ++p, temp++)
+//                    {
+//                        if ((rawBoard[temp][i] == 'X') ||
+//                                (rawBoard[temp][i] == 'O'))
 //                        {
-//
+//                            isPlaceable = false;
+//                            break;
 //                        }
-                    }
-                    // If can place ship over spaces, increment their counters.
-                    if (isPlaceable)
-                    {
-                        // Reset tempJ.
-                        tempJ = realJ;
-                        for (int q = 0; q < sizes[k]; ++q, tempJ++)
-                        {
-                            boardSpaces[i][tempJ].incrementCounter();
-                        }
-                    }
-                }
-            }
-        }
-
-        // Symmetrical to horizontal placing because board is square.
-        // Vertical placing. i = col index.
-        for (int i = 0; i < 10; ++i)
-        {
-            // For each ship to be placed.
-            for (int k = 0; k < 5; ++k)
-            {
-                // Keep going until go out of bounds. Last legal column index
-                // is equivalent to 10 - sizes[k].
-                for (int realJ = 0; realJ < 10 - sizes[k]; ++realJ)
-                {
-                    int tempJ = realJ;
-                    // And thus whether must increment space counters.
-                    isPlaceable = true;
-                    // Go for the length of the current ship to be "placed."
-                    for (int p = 0; p < sizes[k]; ++p, tempJ++)
-                    {
-                        if ((rawBoard[tempJ][i] == 'X') ||
-                                (rawBoard[tempJ][i] == 'O'))
-                        {
-                            isPlaceable = false;
-                            break;
-                        }
-                    }
-                    // If can place ship over spaces, increment their counters.
-                    if (isPlaceable)
-                    {
-                        // Reset tempJ.
-                        tempJ = realJ;
-                        for (int q = 0; q < sizes[k]; ++q, tempJ++)
-                        {
-                            boardSpaces[tempJ][i].incrementCounter();
-                        }
-                    }
-                }
-            }
-        }
+//                    }
+//                    // If can place ship over spaces, increment their counters.
+//                    if (isPlaceable)
+//                    {
+//                        // Reset temp.
+//                        temp = j;
+//                        for (int q = 0; q < extantShipLengths.get(k); ++q,
+//                                temp++)
+//                        {
+//                            boardSpaces[temp][i].incrementCounter();
+//                        }
+//                    }
+//                }
+//            }
+//        }
         // Print counters.
         System.out.println("Counters:\n");
         for (int i = 0; i < 10; ++i)
@@ -361,43 +308,71 @@ public class Computer
             }
             System.out.println();
         }
+        // Now try to place ships vertically but make sure to continuously loop.
+        if (isHorizontal)
+        {
+            setBoardSpaces(false);
+        }
+    }
+
+    private boolean isPlaceable(int row, int col, int length,
+                                boolean isHorizontal)
+    {
+        boolean toReturn = true;
+        char curr;
+        for (int i = 0; i < length; ++i)
+        {
+            // Went off the edge.
+            if (row > 9 || col > 9)
+            {
+                toReturn = false;
+                break;
+            }
+            curr = rawBoard[row][col];
+            if (curr == 'X' || curr == 'O')
+            {
+                toReturn = false;
+                break;
+            }
+            if (isHorizontal)
+            {
+                col++;
+            }
+            // Go vertically.
+            else
+            {
+                row++;
+            }
+        }
+        return toReturn;
+    }
+
+    private void setSpaceCounters(int row, int col, int length,
+                                  boolean isHorizontal)
+    {
+        for (int i = 0; i < length; ++i)
+        {
+            boardSpaces[row][col].incrementCounter();
+            if (isHorizontal)
+            {
+                col++;
+            }
+            // Go vertically.
+            else
+            {
+                row++;
+            }
+        }
     }
 
     /**
-     * Depending on the parity, get the right 2d array to use.
-     *
-     * @param  parity number of spaces between considered shots
-     * @return 2D int array representing shots that should be taken
+     * Get the best position to shoot at next in the Hunt phase based on the
+     * above described probability density function.
      */
-    private int[][] getRightBoard(int parity)
+    private void setHuntShot()
     {
-        int[][] parityBoard = new int[0][0];
-        if (parity == 2)
-        {
-            parityBoard = twoParityBoard;
-        }
-        else if (parity == 3)
-        {
-            parityBoard = threeParityBoard;
-        }
-        else if (parity == 4)
-        {
-            parityBoard =  fourParityBoard;
-        }
-        else if (parity == 5)
-        {
-            parityBoard =  fiveParityBoard;
-        }
-        return parityBoard;
-    }
+        
 
-    /**
-     * Using parity board, set random point.
-     *
-     * @param pBoard parity board to be used in getting random point
-     */
-    private void setHuntShot(int[][] pBoard)
-    {
         ArrayList<BoardSpace> flatList = new ArrayList<BoardSpace>();
         for (int i = 0; i < 10; ++i)
         {
@@ -408,7 +383,7 @@ public class Computer
         }
         /*
          * Sort in descending order based on counter.
-         * Now the space with the highest counter is at the beginning.
+         * Now the BoardSpace with the highest counter is at the beginning.
          */
         Collections.sort(flatList, Collections.reverseOrder());
 
@@ -639,7 +614,7 @@ public class Computer
      */
     private void updateOnSunkShip(String name)
     {
-        shipsSunk.add(name);
+        //shipsSunk.add(name);
         shipsTargeted.remove(name);
 
         /*
@@ -660,57 +635,96 @@ public class Computer
         }
         // Reset direction since ship sunk.
         direction = "";
-        updateParity();
+        updateExtantShipLengths(name);
     }
 
-    /**
-     * Update parity based on ships sunk.
-     */
-    private void updateParity()
+    private void updateExtantShipLengths(String shipName)
     {
-        switch (parity)
+        switch (shipName)
         {
-            case 2:
+            case "Carrier":
             {
-                // If destroyer sunk, only need to search every 3rd square.
-                if (shipsSunk.contains("Destroyer"))
-                {
-                    parity = 3;
-                }
+                /*
+                 * Cast to Integer because want to remove 5 itself,
+                 * not whatever is at position 5.
+                 */
+                extantShipLengths.remove((Integer)5);
                 break;
             }
-            case 3:
+            case "Battleship":
             {
-                // If both 3-ships sunk, only need to search every 4th square.
-                if (shipsSunk.contains("Cruiser") && shipsSunk.contains
-                        ("Submarine"))
-                {
-                    parity = 4;
-                }
+                extantShipLengths.remove((Integer)4);
                 break;
             }
-            case 4:
+            // Cruiser and Submarine both length 3.
+            case "Cruiser":
+            case "Submarine":
             {
-                // If all ships sunk except carrier, search every 5th square.
-                if (shipsSunk.contains("Battleship"))
-                {
-                    parity = 5;
-                }
+                extantShipLengths.remove((Integer)3);
                 break;
             }
-            case 5:
+            case "Destroyer":
             {
-                // If get to this point, do nothing; AI has won.
+                extantShipLengths.remove((Integer)2);
                 break;
             }
             default:
             {
-                System.out.println("Parity needs to be between 2-5. Exiting");
+                System.out.println("Illegal ship name. Exiting.");
                 System.exit(1);
                 break;
             }
         }
     }
+
+    /**
+     * Update parity based on ships sunk.
+     */
+//    private void updateParity()
+//    {
+//        switch (parity)
+//        {
+//            case 2:
+//            {
+//                // If destroyer sunk, only need to search every 3rd square.
+//                if (shipsSunk.contains("Destroyer"))
+//                {
+//                    parity = 3;
+//                }
+//                break;
+//            }
+//            case 3:
+//            {
+//                // If both 3-ships sunk, only need to search every 4th square.
+//                if (shipsSunk.contains("Cruiser") && shipsSunk.contains
+//                        ("Submarine"))
+//                {
+//                    parity = 4;
+//                }
+//                break;
+//            }
+//            case 4:
+//            {
+//                // If all ships sunk except carrier, search every 5th square.
+//                if (shipsSunk.contains("Battleship"))
+//                {
+//                    parity = 5;
+//                }
+//                break;
+//            }
+//            case 5:
+//            {
+//                // If get to this point, do nothing; AI has won.
+//                break;
+//            }
+//            default:
+//            {
+//                System.out.println("Parity needs to be between 2-5. Exiting");
+//                System.exit(1);
+//                break;
+//            }
+//        }
+//    }
 
     /**
      * Pushes onto stack the points around origin hit that are legal and not
