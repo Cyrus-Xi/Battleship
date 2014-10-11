@@ -226,7 +226,7 @@ public class Computer
 
     private void setBoardSpaces(boolean isHorizontal)
     {
-        // Reset boardSpace values at the start of each turn.
+        // Reset BoardSpace values at the start of each turn.
         if (isHorizontal)
         {
             for (int i = 0; i < 10; ++i)
@@ -309,7 +309,7 @@ public class Computer
             }
             System.out.println();
         }
-        // Now try to place ships vertically but make sure to continuously loop.
+        // Now try to place ships vertically but make sure not to loop again.
         if (isHorizontal)
         {
             setBoardSpaces(false);
@@ -372,6 +372,37 @@ public class Computer
      */
     private void setHuntShot()
     {
+        setSpaceNeighborSums();
+
+        ArrayList<BoardSpace> flatList = new ArrayList<BoardSpace>();
+        for (int i = 0; i < 10; ++i)
+        {
+            for (BoardSpace space : boardSpaces[i])
+            {
+                flatList.add(space);
+            }
+        }
+        /*
+         * Sort in descending order based on counter then on neighbor sum.
+         * Now the BoardSpace with the highest counter etc. is at the beginning.
+         */
+        Collections.sort(flatList, Collections.reverseOrder());
+
+        row = flatList.get(0).getRow();
+        col = flatList.get(0).getCol();
+
+        // Just in case have already shot there.
+        int index = 0;
+        while ((rawBoard[row][col] == 'X') || (rawBoard[row][col] == 'O'))
+        {
+            index++;
+            row = flatList.get(index).getRow();
+            col = flatList.get(index).getCol();
+        }
+    }
+
+    private void setSpaceNeighborSums()
+    {
         for (int row = 0; row < 10; ++row)
         {
             for (int col = 0; col < 10; ++col)
@@ -400,31 +431,6 @@ public class Computer
                 }
                 curr.setNeighboringSum(sum);
             }
-        }
-
-        ArrayList<BoardSpace> flatList = new ArrayList<BoardSpace>();
-        for (int i = 0; i < 10; ++i)
-        {
-            for (BoardSpace space : boardSpaces[i])
-            {
-                flatList.add(space);
-            }
-        }
-        /*
-         * Sort in descending order based on counter.
-         * Now the BoardSpace with the highest counter is at the beginning.
-         */
-        Collections.sort(flatList, Collections.reverseOrder());
-
-        row = flatList.get(0).getRow();
-        col = flatList.get(0).getCol();
-
-        int index = 1;
-        while ((rawBoard[row][col] == 'X') || (rawBoard[row][col] == 'O'))
-        {
-            row = flatList.get(index).getRow();
-            col = flatList.get(index).getCol();
-            index++;
         }
     }
 
