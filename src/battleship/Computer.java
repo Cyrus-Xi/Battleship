@@ -629,13 +629,12 @@ public class Computer
     }
 
     /**
-     * Ship sunk so update lists and see if need to update parity.
+     * Ship sunk so update lists.
      *
      * @param name sunk ship's name
      */
     private void updateOnSunkShip(String name)
     {
-        //shipsSunk.add(name);
         shipsTargeted.remove(name);
 
         /*
@@ -656,9 +655,16 @@ public class Computer
         }
         // Reset orientation since ship sunk.
         orientation = "";
+
+        // Remove sunk ship's length.
         updateExtantShipLengths(name);
     }
 
+    /**
+     * Remove sunk ship's length.
+     *
+     * @param shipName name of sunk ship
+     */
     private void updateExtantShipLengths(String shipName)
     {
         switch (shipName)
@@ -697,55 +703,6 @@ public class Computer
             }
         }
     }
-
-    /**
-     * Update parity based on ships sunk.
-     */
-//    private void updateParity()
-//    {
-//        switch (parity)
-//        {
-//            case 2:
-//            {
-//                // If destroyer sunk, only need to search every 3rd square.
-//                if (shipsSunk.contains("Destroyer"))
-//                {
-//                    parity = 3;
-//                }
-//                break;
-//            }
-//            case 3:
-//            {
-//                // If both 3-ships sunk, only need to search every 4th square.
-//                if (shipsSunk.contains("Cruiser") && shipsSunk.contains
-//                        ("Submarine"))
-//                {
-//                    parity = 4;
-//                }
-//                break;
-//            }
-//            case 4:
-//            {
-//                // If all ships sunk except carrier, search every 5th square.
-//                if (shipsSunk.contains("Battleship"))
-//                {
-//                    parity = 5;
-//                }
-//                break;
-//            }
-//            case 5:
-//            {
-//                // If get to this point, do nothing; AI has won.
-//                break;
-//            }
-//            default:
-//            {
-//                System.out.println("Parity needs to be between 2-5. Exiting");
-//                System.exit(1);
-//                break;
-//            }
-//        }
-//    }
 
     /**
      * Pushes onto stack the points around origin hit that are legal and not
