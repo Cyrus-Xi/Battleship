@@ -2,8 +2,9 @@
  * Author:
  *      Cyrus Xi
  * Purpose:
- *      This class represents the Computer player. It implements the
- * 	    "strategy" element. Part of the algorithm is taken from here:
+ *      This class represents the Computer player. It implements an adaptive
+ *      targeting algorithm based on a quasi-probability density function of
+ *      extant ships. Part of the algorithm is taken from here:
  * 		http://www.datagenetics.com/blog/december32011/index.html
  * Strategy details:
  *      There are two phases to the Computer's strategy: the Hunt and the
@@ -12,28 +13,30 @@
  *      the Computer is trying to finish off and sink an opponent's ship
  *      that has been struck.
  *
- *      During the Hunt phase, the Computer uses something like a
- *      probability density function to calculate the most likely places
- *      in which an enemy ship will be located. Each turn, the Computer
- *      goes through the board (which, as the game continues, is increasingly
- *      filled with misses and sunk ships) and tries to place each extant
- *      ship in each board location, first horizontally then vertically. If the
- *      ship can be placed (i.e., doesn't go off the board or through missed
- *      shots or already sunk ships), then each BoardSpace in that placing
- *      gets its counter attribute incremented by 1. The BoardSpace with the
- *      highest counter value is the mostly likely spot for an enemy ship to
- *      pass through.
+ *      During the Hunt phase, the Computer uses something like a probability
+ *      density function to calculate the most likely places in which an
+ *      enemy ship will be located. Each turn, the Computer goes through the
+ *      board (which, as the game continues, is increasingly filled with
+ *      misses and sunk ships) and tries to place each extant ship in each
+ *      possible board location, first horizontally then vertically. If the
+ *      ship can be placed (i.e., doesn't go off the board or through missed shots or
+ *      already sunk ships), then each BoardSpace in that placing gets its
+ *      counter attribute incremented by 1. The BoardSpace with the highest
+ *      counter value is the mostly likely spot for an enemy ship to pass
+ *      through. If there are multiple BoardSpaces with the highest counter
+ *      value, then the tie is won by the one with the highest sum of
+ *      neighboring BoardSpace counter values.
  *
  *      When a ship has been struck, the Computer goes on to the Target
  *      phase, which can also be loosely divided into two phases. In the
- *      first mini-phase, the Computer does not know which direction the struck
- *      ship is placed (horizontal or vertical) so it simply adds the four
+ *      first mini-phase, the Computer does not know the struck ship's
+ *      orientation (horizontal or vertical) so it simply adds the four
  *      cardinal direction points (or fewer depending on obstructions) around
  *      the successful shot to a stack and pops the stack for the next shot.
  *      Once two points of a ship have been hit, the Computer can determine the
- *      direction of the ship and move on to the next mini-phase, which is
+ *      orientation of the ship and move on to the next mini-phase, which is
  *      just the completion of the sinking of that ship based on its
- *      now-known direction.
+ *      now-known orientation.
  * Date:
  *      09/20/14.
  */
@@ -261,54 +264,18 @@ public class Computer
                 }
             }
         }
-//        // Symmetrical to horizontal placing because board is square.
-//        // Vertical placing. i = col index.
+
+        // Uncomment to print BoardSpace counters.
+//        System.out.println("Counters:\n");
 //        for (int i = 0; i < 10; ++i)
 //        {
-//            // For each ship to be placed.
-//            for (int k = 0; k < extantShipLengths.size(); ++k)
+//            for (int j = 0; j < 10; j++)
 //            {
-//                // Keep going until go out of bounds. Last legal column index
-//                // is equivalent to 10 - sizes[k].
-//                for (int j = 0; j <= (10 - extantShipLengths.get(k)); ++j)
-//                {
-//                    int temp = j;
-//                    // And thus whether must increment space counters.
-//                    isPlaceable = true;
-//                    // Go for the length of the current ship to be "placed."
-//                    for (int p = 0; p < extantShipLengths.get(k); ++p, temp++)
-//                    {
-//                        if ((rawBoard[temp][i] == 'X') ||
-//                                (rawBoard[temp][i] == 'O'))
-//                        {
-//                            isPlaceable = false;
-//                            break;
-//                        }
-//                    }
-//                    // If can place ship over spaces, increment their counters.
-//                    if (isPlaceable)
-//                    {
-//                        // Reset temp.
-//                        temp = j;
-//                        for (int q = 0; q < extantShipLengths.get(k); ++q,
-//                                temp++)
-//                        {
-//                            boardSpaces[temp][i].incrementCounter();
-//                        }
-//                    }
-//                }
+//                System.out.print(boardSpaces[i][j]);
 //            }
+//            System.out.println();
 //        }
-        // Print counters.
-        System.out.println("Counters:\n");
-        for (int i = 0; i < 10; ++i)
-        {
-            for (int j = 0; j < 10; j++)
-            {
-                System.out.print(boardSpaces[i][j]);
-            }
-            System.out.println();
-        }
+
         // Now try to place ships vertically but make sure not to loop again.
         if (isHorizontal)
         {
