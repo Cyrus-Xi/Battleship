@@ -4,16 +4,16 @@
  * Purpose:
  *      This class represents the Computer player. It implements an adaptive
  *      targeting algorithm based on a quasi-probability density function of
- *      extant ships. Part of the algorithm is taken from here:
+ *      extant ships. Part of the algorithm is inspired from this:
  * 		http://www.datagenetics.com/blog/december32011/index.html
  * Strategy details:
- *      There are two phases to the Computer's strategy: the Hunt and the
+ *          There are two phases to the Computer's strategy: the Hunt and the
  *      Target phases. In the Hunt phase, the Computer is trying to hit a
  *      ship. Once a ship has been hit, we are in the Target phase where
  *      the Computer is trying to finish off and sink an opponent's ship
  *      that has been struck.
  *
- *      During the Hunt phase, the Computer uses something like a probability
+ *          During the Hunt phase, the Computer uses something like a probability
  *      density function to calculate the most likely places in which an
  *      enemy ship will be located. Each turn, the Computer goes through the
  *      board (which, as the game continues, is increasingly filled with
@@ -27,7 +27,7 @@
  *      value, then the tie is won by the one with the highest sum of
  *      neighboring BoardSpace counter values.
  *
- *      When a ship has been struck, the Computer goes on to the Target
+ *          When a ship has been struck, the Computer goes on to the Target
  *      phase, which can also be loosely divided into two phases. In the
  *      first mini-phase, the Computer does not know the struck ship's
  *      orientation (horizontal or vertical) so it simply adds the four
@@ -63,7 +63,9 @@ public class Computer
      */
     char [][] rawBoard;
 
-    // 10x10 board.
+    /**
+     * 10x10 array of BoardSpaces to implement probability density function.
+     */
     BoardSpace [][] boardSpaces = new BoardSpace [10][10];
 
     /**
@@ -95,11 +97,6 @@ public class Computer
     Stack<ShipPoint> possibleHits = new Stack<ShipPoint>();
 
     /**
-     * Ships that the AI has sunk.
-     */
-    //ArrayList<String> shipsSunk = new ArrayList<String>();
-
-    /**
      * Ships currently being targeted.
      */
     ArrayList<String> shipsTargeted = new ArrayList<String>();
@@ -107,7 +104,7 @@ public class Computer
     /**
      * Whether opponent's ship is going horizontally or vertically.
      */
-    String direction = "";
+    String orientation = "";
 
     /**
      * Array of pointHits, successful shots.
@@ -116,7 +113,7 @@ public class Computer
             ArrayList<ArrayList<Object>>();
 
     /**
-     * To convert random col to column letter.
+     * To convert col value to column letter.
      */
     char[] columnHeaders = "ABCDEFGHIJ".toCharArray();
 
@@ -150,25 +147,21 @@ public class Computer
 
         // Update board each turn.
         rawBoard = ofOpponent.getBoard();
-        for (Integer item : extantShipLengths)
-        {
-            System.out.print(item);
-        }
-        // Set counts "horizontally" first.
-        setBoardSpaces(true);
-        ShipPoint currPoint;
 
+        // Set counts "horizontally" first. Calls itself for vertical counts.
+        setBoardSpaces(true);
+
+        ShipPoint currPoint;
         String message;
         char type;
 
         // Whether ship has been sunk.
         boolean sunk = false;
 
-        // Get right board to be considered.
-        //int[][] parityBoard = getRightBoard(parity);
-
-        // No stack of possible hits (i.e., not trying to finish off hit
-        // ships) so get random row & col values for shot.
+        /*
+         * Hunt phase (i.e., not trying to finish off ship) so get row & col
+         * values from probability density function.
+         */
         if (possibleHits.isEmpty())
         {
             setHuntShot();
@@ -207,7 +200,7 @@ public class Computer
             {
                 currPoint = new ShipPoint(type, row, col);
                 // Add feasible points around successful hit to stack.
-                addPointsAround(currPoint, direction);
+                addPointsAround(currPoint, orientation);
             }
         }
         /*
@@ -223,13 +216,22 @@ public class Computer
             int colLeft = (Integer)pointLeft.get(2);
 
             ShipPoint shipPointLeft = new ShipPoint('Z', rowLeft, colLeft);
-            addPointsAround(shipPointLeft, direction);
+            addPointsAround(shipPointLeft, orientation);
         }
     }
 
+    /**
+     * Helps implements the probability density function. Tries every extant
+     * ship's possible board placements to set BoardSpace counter values.
+     * <p>
+     * For simplicity's/modularity's sake, calls itself for the vertical
+     * "placing."
+     *
+     * @param isHorizontal true if "placing" horizontally, false if vertically
+     */
     private void setBoardSpaces(boolean isHorizontal)
     {
-        // Reset BoardSpace values at the start of each turn.
+        // Reset BoardSpace values at the start of each full turn.
         if (isHorizontal)
         {
             for (int i = 0; i < 10; ++i)
@@ -243,18 +245,15 @@ public class Computer
         }
 
         boolean isPlaceable;
-        // Try to place each ship first horizontally then vertically.
 
         for (int row = 0; row < 10; ++row)
         {
-            // For each ship to be placed.
+            // For each extant ship.
             for (int index = 0; index < extantShipLengths.size(); ++index)
             {
                 int length = extantShipLengths.get(index);
-                // Keep going until go out of bounds.
                 for (int col = 0; col < 10; ++col)
                 {
-                    // And thus whether must increment space counters.
                     isPlaceable = isPlaceable(row, col, length, isHorizontal);
                     // If can place ship over spaces, increment their counters.
                     if (isPlaceable)
@@ -283,6 +282,15 @@ public class Computer
         }
     }
 
+    /**
+     * Calculates whether ship of given length can be placed.
+     *
+     * @param row
+     * @param col
+     * @param length
+     * @param isHorizontal true if going horizontally, false if vertically
+     * @return
+     */
     private boolean isPlaceable(int row, int col, int length,
                                 boolean isHorizontal)
     {
@@ -402,7 +410,7 @@ public class Computer
     }
 
     /**
-     * Updates on shot being a hit: gets direction, figures if sunk, etc.
+     * Updates on shot being a hit: gets direction, figures out if sunk, etc.
      *
      * @param message the message printed from a shot
      * @return        true if ship was sunk from hit
@@ -440,15 +448,15 @@ public class Computer
                  * Get direction if don't already know, i.e.,
                  * don't change direction if already know it.
                  */
-                if (direction.equals(""))
+                if (orientation.equals(""))
                 {
-                    direction = getDirection(shipName);
+                    orientation = getDirection(shipName);
                 }
                 /*
                  * Now know direction, but could've pushed errant points
                  * before. Correct stack.
                  */
-                updateStack(row, col, direction);
+                updateStack(row, col, orientation);
             }
         }
         // If sunk, update.
@@ -636,7 +644,7 @@ public class Computer
             }
         }
         // Reset direction since ship sunk.
-        direction = "";
+        orientation = "";
         updateExtantShipLengths(name);
     }
 
