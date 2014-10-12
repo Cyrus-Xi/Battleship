@@ -1,8 +1,11 @@
 /*
- * Author: Cyrus Xi
- * Purpose: This class handles the game board setup and its access &
+ * Author:
+ *      Cyrus Xi
+ * Purpose:
+ *      This class handles the game board setup and its access &
  * modification throughout the game.
- * Date: 09/20/14.
+ * Date:
+ *      09/20/14.
  */
 
 package battleship;
@@ -31,21 +34,21 @@ public class GameBoard
     /**
      * Array of ShipPoints.
      */
-	ArrayList<ShipPoint> shipPoints = new ArrayList<ShipPoint>(NUM_SHIP_POINTS);
+	ArrayList<ShipPoint> shipPoints = new ArrayList<>(NUM_SHIP_POINTS);
 
     /**
      * Array of Ship objects.
      */
-	ArrayList<Ship> ships = new ArrayList<Ship>(5);
+	ArrayList<Ship> ships = new ArrayList<>(5);
 
     /**
      * Array of ShipPoints to represent each ship.
      */
-	ArrayList<ShipPoint> rawCarrier = new ArrayList<ShipPoint>(5);
-	ArrayList<ShipPoint> rawBattleship = new ArrayList<ShipPoint>(4);
-	ArrayList<ShipPoint> rawCruiser = new ArrayList<ShipPoint>(3);
-	ArrayList<ShipPoint> rawSubmarine = new ArrayList<ShipPoint>(3);
-	ArrayList<ShipPoint> rawDestroyer = new ArrayList<ShipPoint>(2);
+	ArrayList<ShipPoint> rawCarrier = new ArrayList<>(5);
+	ArrayList<ShipPoint> rawBattleship = new ArrayList<>(4);
+	ArrayList<ShipPoint> rawCruiser = new ArrayList<>(3);
+	ArrayList<ShipPoint> rawSubmarine = new ArrayList<>(3);
+	ArrayList<ShipPoint> rawDestroyer = new ArrayList<>(2);
 	
 	/**
 	 * Constructs game board with provided file.

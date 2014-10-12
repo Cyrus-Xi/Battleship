@@ -2,8 +2,8 @@
  * Author:
  *      Cyrus Xi
  * Purpose:
- *      Helper class for AI's strategy. Represents a GameBoard space with
- *      a counter attached.
+ *      Helper class for Computer's strategy. Represents a GameBoard space with
+ *      a counter and neighborSum attached.
  * Date:
  *      10/08/14.
  */
@@ -24,7 +24,8 @@ public class BoardSpace implements Comparable<BoardSpace>
     private int counter;
 
     /**
-     * The sum of neighboring (in cardinal directions) BoardSpace counters.
+     * The sum of neighboring (in cardinal directions) BoardSpace counter
+     * values.
      */
     private int neighboringSum;
 
@@ -86,11 +87,21 @@ public class BoardSpace implements Comparable<BoardSpace>
         counter = 0;
     }
 
+    /**
+     * Get neighboringSum value.
+     *
+     * @return the neighboringSum
+     */
     public int getNeighboringSum()
     {
         return neighboringSum;
     }
 
+    /**
+     * Set neighboringSum value.
+     *
+     * @param sum new neighboringSum
+     */
     public void setNeighboringSum(int sum)
     {
         neighboringSum = sum;
@@ -115,8 +126,11 @@ public class BoardSpace implements Comparable<BoardSpace>
         return "[" + String.valueOf(counter) + "] ";
     }
 
-    /**
-     * For use in Collections.sort().
+
+
+       /**
+     * For use in Collections.sort(). If counter values equal,
+     * tiebreak based on neighboringSum.
      *
      * @param thatSpace the BoardSpace being compared to
      * @return          -1 if lesser than, 0 if equal, 1 if greater than
@@ -182,8 +196,8 @@ public class BoardSpace implements Comparable<BoardSpace>
         else
         {
             BoardSpace thatSpace = (BoardSpace)that;
-            if (this.counter == thatSpace.getCounter() && this.neighboringSum
-                    == thatSpace.getNeighboringSum())
+            if (this.counter == thatSpace.getCounter()
+                    && this.neighboringSum == thatSpace.getNeighboringSum())
             {
                 return true;
             }

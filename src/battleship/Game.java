@@ -1,21 +1,24 @@
 /*
- * Author: Cyrus Xi
- * Purpose: This is the main class. It handles the game loop, board output, etc.
- * Date: 09/20/14.
+ * Author:
+ *      Cyrus Xi
+ * Purpose:
+ *      This is the main class. It handles the game loop, board output, etc.
+ * Date:
+ *      09/20/14.
  * 
  * To build and run from command line:
- * 	Be in project root directory (above src and bin).
- * 	To compile: 
- * 		Type: javac -Xlint -d bin src/battleship/*.java
- * 		("battleship" is the package name. To maintain Eclipse's bin & src
- * 		distinction, this compiles all the .java files in src/battleship and
- * 		then puts the .class files into the bin directory.)
- * 	To run:
- * 	    Uncomment this line -- fname = "src/" + fname; -- in GameBoard class.
- * 	    Type: java -cp bin battleship.Game
- * 		(This first gets the right ships.txt file, then temporarily sets
- * 		classpath to bin folder and runs the Game class in the battleship
- * 		package.)
+ * 	    Be in project root directory (above src and bin).
+ * 	    To compile:
+ * 		    Type: javac -Xlint -d bin src/battleship/*.java
+ * 		    ("battleship" is the package name. To maintain the bin & src
+ * 		    distinction, this compiles all the .java files in src/battleship and
+ * 		    then puts the .class files into the bin directory.)
+ * 	    To run:
+ * 	        Uncomment this line -- fname = "src/" + fname; -- in GameBoard class.
+ * 	        Type: java -cp bin battleship.Game
+ * 		    (This first gets the right ships.txt file, then temporarily sets
+ * 		    classpath to bin folder and runs the Game class in the battleship
+ * 		    package.)
  */
 
 package battleship;

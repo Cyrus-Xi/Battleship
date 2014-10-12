@@ -1,7 +1,10 @@
 /*
- * Author: Cyrus Xi
- * Purpose: Represents a Ship. 
- * Date: 09/20/14.
+ * Author:
+ *      Cyrus Xi
+ * Purpose:
+ *      Represents a Ship.
+ * Date:
+ *      09/20/14.
  */
 
 package battleship;

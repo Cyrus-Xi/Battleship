@@ -94,12 +94,12 @@ public class Computer
      * ship it has hit. The other phase is the "Hunt" one where the AI tries
      * to find a ship.
      */
-    Stack<ShipPoint> possibleHits = new Stack<ShipPoint>();
+    Stack<ShipPoint> possibleHits = new Stack<>();
 
     /**
      * Ships currently being targeted.
      */
-    ArrayList<String> shipsTargeted = new ArrayList<String>();
+    ArrayList<String> shipsTargeted = new ArrayList<>();
 
     /**
      * Whether opponent's ship is going horizontally or vertically.
@@ -109,8 +109,7 @@ public class Computer
     /**
      * Array of pointHits, successful shots.
      */
-    ArrayList<ArrayList<Object>> pointsTargeted = new
-            ArrayList<ArrayList<Object>>();
+    ArrayList<ArrayList<Object>> pointsTargeted = new ArrayList<>();
 
     /**
      * To convert col value to column letter.
@@ -249,9 +248,8 @@ public class Computer
         for (int row = 0; row < 10; ++row)
         {
             // For each extant ship.
-            for (int index = 0; index < extantShipLengths.size(); ++index)
+            for (Integer length : extantShipLengths)
             {
-                int length = extantShipLengths.get(index);
                 for (int col = 0; col < 10; ++col)
                 {
                     isPlaceable = isPlaceable(row, col, length, isHorizontal);
@@ -285,11 +283,11 @@ public class Computer
     /**
      * Calculates whether ship of given length can be placed.
      *
-     * @param row
-     * @param col
-     * @param length
+     * @param row          starting point's row value
+     * @param col          starting point's col value
+     * @param length       length of ship
      * @param isHorizontal true if going horizontally, false if vertically
-     * @return
+     * @return             true if can be placed, false otherwise
      */
     private boolean isPlaceable(int row, int col, int length,
                                 boolean isHorizontal)
@@ -304,6 +302,7 @@ public class Computer
                 toReturn = false;
                 break;
             }
+
             curr = rawBoard[row][col];
             if (curr == 'X' || curr == 'O')
             {
@@ -314,7 +313,7 @@ public class Computer
             {
                 col++;
             }
-            // Go vertically.
+            // Else go vertically.
             else
             {
                 row++;
@@ -323,6 +322,15 @@ public class Computer
         return toReturn;
     }
 
+    /**
+     * Increment BoardSpace counter values for successful possible ship
+     * placement.
+     *
+     * @param row          starting point's row value
+     * @param col          starting point's col value
+     * @param length       length of ship
+     * @param isHorizontal true if going horizontally, false if vertically
+     */
     private void setSpaceCounters(int row, int col, int length,
                                   boolean isHorizontal)
     {
@@ -333,7 +341,7 @@ public class Computer
             {
                 col++;
             }
-            // Go vertically.
+            // Else go vertically.
             else
             {
                 row++;
@@ -347,15 +355,13 @@ public class Computer
      */
     private void setHuntShot()
     {
+        // In case the highest counter value is shared.
         setSpaceNeighborSums();
 
-        ArrayList<BoardSpace> flatList = new ArrayList<BoardSpace>();
+        ArrayList<BoardSpace> flatList = new ArrayList<>();
         for (int i = 0; i < 10; ++i)
         {
-            for (BoardSpace space : boardSpaces[i])
-            {
-                flatList.add(space);
-            }
+            Collections.addAll(flatList, boardSpaces[i]);
         }
         /*
          * Sort in descending order based on counter then on neighbor sum.
@@ -376,6 +382,10 @@ public class Computer
         }
     }
 
+    /**
+     * Tiebreaker in compareTo method. Set's each BoardSpaces neighbor sum,
+     * which is the sum of its neighbors' counter values.
+     */
     private void setSpaceNeighborSums()
     {
         for (int row = 0; row < 10; ++row)
@@ -410,26 +420,28 @@ public class Computer
     }
 
     /**
-     * Updates on shot being a hit: gets direction, figures out if sunk, etc.
+     * Updates on shot being a hit: gets orientation, figures out if sunk, etc.
      *
      * @param message the message printed from a shot
      * @return        true if ship was sunk from hit
      */
     private boolean updateOnHit(String message)
     {
-        String shipName;
+        final String shipName;
         boolean sunk;
-
-        // Array of ship type, row, col.
-        ArrayList<Object> pointHit = new ArrayList<Object>();
 
         // Get ship name and whether it was sunk.
         shipName = getNameFromMessage(message);
         sunk = isSunk(message);
 
-        pointHit.add(shipName);
-        pointHit.add(row);
-        pointHit.add(col);
+        // Array of ship type, row, col. Double brace initialized.
+        ArrayList<Object> pointHit = new ArrayList<Object>()
+        {{
+            add(shipName);
+            add(row);
+            add(col);
+        }};
+
         pointsTargeted.add(pointHit);
 
         // Ship hit but not sunk.
@@ -441,19 +453,19 @@ public class Computer
                 // Add ship hit to list.
                 shipsTargeted.add(shipName);
             }
-            // Already hit once so can determine direction.
+            // Already hit once so can determine orientation.
             else
             {
                 /*
-                 * Get direction if don't already know, i.e.,
-                 * don't change direction if already know it.
+                 * Get orientation if don't already know, i.e.,
+                 * don't change if already know it.
                  */
                 if (orientation.equals(""))
                 {
-                    orientation = getDirection(shipName);
+                    orientation = getOrientation(shipName);
                 }
                 /*
-                 * Now know direction, but could've pushed errant points
+                 * Now know orientation, but could've pushed errant points
                  * before. Correct stack.
                  */
                 updateStack(row, col, orientation);
@@ -535,17 +547,16 @@ public class Computer
     }
 
     /**
-     * From hitting a ship twice, can get what direction it is lying in.
+     * From hitting a ship twice, can get its orientation.
      *
      * @param name name of ship hit
-     * @return     direction ship is lying in
+     * @return     orientation of ship
      */
-    private String getDirection(String name)
+    private String getOrientation(String name)
     {
         String toReturn = "";
 
-        ArrayList<ArrayList<Object>> shipPoints = new ArrayList<ArrayList
-                <Object>>();
+        ArrayList<ArrayList<Object>> shipPoints = new ArrayList<>();
 
         // Get points hit that belong to same ship.
         for (ArrayList<Object> pointHit : pointsTargeted)
@@ -560,12 +571,12 @@ public class Computer
         ArrayList<Object> firstPoint = shipPoints.get(0);
         ArrayList<Object> secondPoint = shipPoints.get(1);
 
-        // If their row values agree, then horizontal direction.
+        // If their row values agree, then horizontal orientation.
         if (firstPoint.get(1) == secondPoint.get(1))
         {
             toReturn = "Horizontal";
         }
-        // Else if column values agree, then vertical direction.
+        // Else if column values agree, then vertical orientation.
         else if (firstPoint.get(2) == secondPoint.get(2))
         {
             toReturn = "Vertical";
@@ -574,18 +585,18 @@ public class Computer
     }
 
     /**
-     * Removes errant points from stack after finding out direction.
+     * Removes errant points from stack after finding out orientation.
      *
-     * @param row       successful shot's row
-     * @param col       successful shot's col
-     * @param direction direction ship is lying in
+     * @param row         successful shot's row
+     * @param col         successful shot's col
+     * @param orientation orientation of ship
      */
-    private void updateStack(int row, int col, String direction)
+    private void updateStack(int row, int col, String orientation)
     {
         // Use iterator to remove elements from stack whilst iterating.
         Iterator<ShipPoint> iter = possibleHits.iterator();
 
-        if (direction.equals("Vertical"))
+        if (orientation.equals("Vertical"))
         {
             while (iter.hasNext())
             {
@@ -600,7 +611,7 @@ public class Computer
                 }
             }
         }
-        else if (direction.equals("Horizontal"))
+        else if (orientation.equals("Horizontal"))
         {
             while (iter.hasNext())
             {
@@ -643,7 +654,7 @@ public class Computer
                 iter.remove();
             }
         }
-        // Reset direction since ship sunk.
+        // Reset orientation since ship sunk.
         orientation = "";
         updateExtantShipLengths(name);
     }
@@ -741,9 +752,9 @@ public class Computer
      * yet attempted.
      *
      * @param originPoint the point that was hit
-     * @param direction   direction of ship if known
+     * @param orientation orientation of ship if known
      */
-    private void addPointsAround(ShipPoint originPoint, String direction)
+    private void addPointsAround(ShipPoint originPoint, String orientation)
     {
         int originRow = originPoint.getRow();
         int originCol = originPoint.getCol();
@@ -756,7 +767,7 @@ public class Computer
          * Can't go north if at top row already.
          * And don't go north if ship is going horizontally.
          */
-        if (originRow != 0 && !direction.equals("Horizontal"))
+        if (originRow != 0 && !orientation.equals("Horizontal"))
         {
             newRow = originRow-1;
             // Placeholder type; would be cheating to look at real type.
@@ -775,7 +786,7 @@ public class Computer
          * Can't go west if at leftmost col already.
          * And don't go west if ship is going vertically.
          */
-        if (originCol != 0 && !direction.equals("Vertical"))
+        if (originCol != 0 && !orientation.equals("Vertical"))
         {
             newCol = originCol - 1;
             // Placeholder type; would be cheating to look at real type.
@@ -790,7 +801,7 @@ public class Computer
             }
         }
         // South.
-        if (originRow != 9 && !direction.equals("Horizontal"))
+        if (originRow != 9 && !orientation.equals("Horizontal"))
         {
             newRow = originRow + 1;
             currPoint = new ShipPoint('T', newRow, originCol);
@@ -802,7 +813,7 @@ public class Computer
             }
         }
         // East.
-        if (originCol != 9 && !direction.equals("Vertical"))
+        if (originCol != 9 && !orientation.equals("Vertical"))
         {
             newCol = originCol + 1;
             currPoint = new ShipPoint('E', originRow, newCol);

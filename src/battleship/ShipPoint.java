@@ -1,8 +1,11 @@
 /*
- * Author: Cyrus Xi
- * Purpose: A helper class that represents a placed ship point. 
+ * Author:
+ *      Cyrus Xi
+ * Purpose:
+ *      A helper class that represents a placed ship point.
  * 			It's a "tuple" of the ship type (A, B, etc.) and its coordinates.
- * Date: 09/20/14.
+ * Date:
+ *      09/20/14.
  */
 
 package battleship;
