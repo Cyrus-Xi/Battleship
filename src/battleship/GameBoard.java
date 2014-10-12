@@ -201,6 +201,7 @@ public class GameBoard
 	public boolean placePoints(int row, int col, int dir, int size,
 								char type)
 	{
+        boolean toReturn;
 		// Check that there's enough space in specified direction.
 		switch (dir)
 		{
@@ -234,17 +235,17 @@ public class GameBoard
 				System.exit(1);
 				break;
 		}
-		// Also check that the path is clear for the ship to be placed.
-		if (!isPathClear(row, col, dir, size))
-		{
-			return false;
-		}
-		// Clear to place ship's points.
-		else
-		{
-			populateInDir(row, col, dir, size, type);
-			return true;
-		}
+
+        // Check if the path is clear for the ship to be placed.
+        toReturn = isPathClear(row, col, dir, size);
+
+        // If so, place ship's points.
+        if (toReturn)
+        {
+            populateInDir(row, col, dir, size, type);
+        }
+
+        return toReturn;
 	}
 	
 	/**

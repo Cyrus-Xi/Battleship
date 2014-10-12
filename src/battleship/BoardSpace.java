@@ -128,7 +128,7 @@ public class BoardSpace implements Comparable<BoardSpace>
 
 
 
-       /**
+    /**
      * For use in Collections.sort(). If counter values equal,
      * tiebreak based on neighboringSum.
      *
