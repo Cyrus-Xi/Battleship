@@ -126,8 +126,6 @@ public class BoardSpace implements Comparable<BoardSpace>
         return "[" + String.valueOf(counter) + "] ";
     }
 
-
-
     /**
      * For use in Collections.sort(). If counter values equal,
      * tiebreak based on neighboringSum.
