@@ -158,8 +158,8 @@ public class GameBoard
 				rand = new Random();
 				
 				// Get a random "origin" point for ship.
-				row = rand.nextInt((9 - 0) + 1);
-				col = rand.nextInt((9 - 0) + 1);
+				row = rand.nextInt(10);
+				col = rand.nextInt(10);
 
 				/*
 				 *  Check if origin is unoccupied.
@@ -171,7 +171,7 @@ public class GameBoard
 					
 					// Get random direction to place ship in.
                     // max - min + 1 (to make max inclusive).
-					dir = rand.nextInt((3 - 0) + 1);
+					dir = rand.nextInt(4);
 
                     // Try to place ship in that direction.
 					pointsWerePlaced = placePoints(row, col, dir, sizes[i], 
