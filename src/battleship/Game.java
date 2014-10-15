@@ -9,10 +9,10 @@
  * To build and run from command line:
  *      Be in project root directory (above src and bin).
  *      To compile:
- * 		    Type: javac -Xlint -d bin src/battleship/*.java
- * 		    ("battleship" is the package name. To maintain the bin & src
- * 		    distinction, this compiles all the .java files in src/battleship and
- * 		    then puts the .class files into the bin directory.)
+ *          Type: javac -Xlint -d bin src/battleship/*.java
+ *          ("battleship" is the package name. To maintain the bin & src
+ *          distinction, this compiles all the .java files in src/battleship and
+ *          then puts the .class files into the bin directory.)
  *      To run:
  *          Uncomment this line -- fname = "src/" + fname; -- in GameBoard class.
  *          Type: java -cp bin battleship.Game
