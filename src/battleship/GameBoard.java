@@ -18,32 +18,32 @@ import java.io.*;
  */
 public class GameBoard 
 {
-    /**
-     * Actual primitive board is a 2D 10x10 char array.
-     */
+	/**
+	 * Actual primitive board is a 2D 10x10 char array.
+	 */
 	char[][] board;
-    int numRows = 10;
-    int numColumns = 10;
+	int numRows = 10;
+	int numColumns = 10;
 
-    /**
-     * 5 ships that take up 17 points.
-     */
+	/**
+	 * 5 ships that take up 17 points.
+	 */
 	int NUM_SHIPS = 5;
 	int NUM_SHIP_POINTS = 17;
 
-    /**
-     * Array of ShipPoints.
-     */
+	/**
+	 * Array of ShipPoints.
+	 */
 	ArrayList<ShipPoint> shipPoints = new ArrayList<>(NUM_SHIP_POINTS);
 
-    /**
-     * Array of Ship objects.
-     */
+	/**
+	 * Array of Ship objects.
+	 */
 	ArrayList<Ship> ships = new ArrayList<>(5);
 
-    /**
-     * Array of ShipPoints to represent each ship.
-     */
+	/**
+	 * Array of ShipPoints to represent each ship.
+	 */
 	ArrayList<ShipPoint> rawCarrier = new ArrayList<>(5);
 	ArrayList<ShipPoint> rawBattleship = new ArrayList<>(4);
 	ArrayList<ShipPoint> rawCruiser = new ArrayList<>(3);
@@ -104,15 +104,15 @@ public class GameBoard
 				}
 			}
 		}
-        // Instantiate ship objects from board.
+		// Instantiate ship objects from board.
 		setUpShips();
 	}
 	
 	/**
 	 * Overloaded constructors. This one does not use a file. To be called on
-     * replays of the game.
-     *
-     * @param random whether board should be randomized or not
+	 * replays of the game.
+	 *
+	 * @param random whether board should be randomized or not
 	 */
 	public GameBoard(boolean random)
 	{	
@@ -126,17 +126,17 @@ public class GameBoard
 			}
 		}
 
-        if (random)
-        {
-            randomizeBoard();
-            setUpShips();
-        }
+		if (random)
+		{
+			randomizeBoard();
+			setUpShips();
+		}
 	}
 
-    /**
-     * Randomizes board's ship placement.
-     */
-    private void randomizeBoard()
+	/**
+	 * Randomizes board's ship placement.
+	 */
+	private void randomizeBoard()
 	{
 		Random rand;
 		int row;
@@ -170,16 +170,16 @@ public class GameBoard
 					rand = new Random();
 					
 					// Get random direction to place ship in.
-                    // max - min + 1 (to make max inclusive).
+					// max - min + 1 (to make max inclusive).
 					dir = rand.nextInt(4);
 
-                    // Try to place ship in that direction.
+					// Try to place ship in that direction.
 					pointsWerePlaced = placePoints(row, col, dir, sizes[i], 
 													types[i]);
 
 					// Not enough space to place ship or path obstructed.
 					if (pointsWerePlaced)
-                    {
+					{
 						// Enough space; ship placed so move on to next ship.
 						break;
 					}
@@ -188,20 +188,20 @@ public class GameBoard
 		}
 	}
 
-    /**
-     * Tries to place ship points from specified point in specified direction.
-     *
-     * @param row  row of origin point
-     * @param col  col of origin point
-     * @param dir  direction to place ship in
-     * @param size ship size
-     * @param type ship type
-     * @return     true if placed ship points successfully
-     */
+	/**
+	 * Tries to place ship points from specified point in specified direction.
+	 *
+	 * @param row  row of origin point
+	 * @param col  col of origin point
+	 * @param dir  direction to place ship in
+	 * @param size ship size
+	 * @param type ship type
+	 * @return     true if placed ship points successfully
+	 */
 	public boolean placePoints(int row, int col, int dir, int size,
 								char type)
 	{
-        boolean toReturn;
+		boolean toReturn;
 		// Check that there's enough space in specified direction.
 		switch (dir)
 		{
@@ -231,21 +231,21 @@ public class GameBoard
 				break;
 			default:
 				System.out.println("Direction should be between 0 - 3. " +
-                        "Exiting.");
+						"Exiting.");
 				System.exit(1);
 				break;
 		}
 
-        // Check if the path is clear for the ship to be placed.
-        toReturn = isPathClear(row, col, dir, size);
+		// Check if the path is clear for the ship to be placed.
+		toReturn = isPathClear(row, col, dir, size);
 
-        // If so, place ship's points.
-        if (toReturn)
-        {
-            populateInDir(row, col, dir, size, type);
-        }
+		// If so, place ship's points.
+		if (toReturn)
+		{
+			populateInDir(row, col, dir, size, type);
+		}
 
-        return toReturn;
+		return toReturn;
 	}
 	
 	/**
@@ -262,7 +262,7 @@ public class GameBoard
 		// Origin point.
 		char currPoint;
 
-        // Use temporary marker to see if path is clear to place ship.
+		// Use temporary marker to see if path is clear to place ship.
 		for (int i = 0; i < shipSize; ++i)
 		{
 			currPoint = board[row][col];
@@ -293,7 +293,7 @@ public class GameBoard
 					break;
 				default:
 					System.out.println("Direction should be between 0 - 3. " +
-                            "Exiting.");
+							"Exiting.");
 					System.exit(1);
 					break;
 			}	
@@ -339,7 +339,7 @@ public class GameBoard
 					break;
 				default:
 					System.out.println("Direction should be between 0 - 3. " +
-                            "Exiting.");
+							"Exiting.");
 					System.exit(1);
 					break;
 			}	
@@ -354,15 +354,15 @@ public class GameBoard
 	 * @param rawCol            user-input col letter
 	 */
 	public String updateBoardAfterShot(boolean belongsToComputer, int rawRow,
-                                  char rawCol)
+								  char rawCol)
 	{
 		// Subtract 1 because board is 0-indexed.
 		int row = rawRow - 1;
 		// Convert column letter to numerical index.
 		int col = "ABCDEFGHIJ".indexOf(rawCol);
 
-        // Message to be printed.
-        String message = "";
+		// Message to be printed.
+		String message = "";
 		
 		// A miss.
 		if (board[row][col] == ' ') 
@@ -370,16 +370,16 @@ public class GameBoard
 			// Mark as a miss.
 			board[row][col] = 'O';
 
-            // Print out differing messages based on whether computer's or not.
+			// Print out differing messages based on whether computer's or not.
 			if (belongsToComputer)
 			{
 				System.out.printf("\n%d%s was a miss. Better luck next " +
-                        "time!\n", rawRow, rawCol);
+						"time!\n", rawRow, rawCol);
 			}
 			else
 			{
 				System.out.printf("The computer missed with %d%s!\n",
-                        rawRow, rawCol);
+						rawRow, rawCol);
 			}
 		}
 		// Already shot here. Neither hit or miss.
@@ -395,19 +395,19 @@ public class GameBoard
 			{
 				message = getHitMessage(true, row, col);
 				System.out.printf("\n%d%s was a hit. %s", rawRow,
-                        rawCol, message);
+						rawCol, message);
 			}
 			else
 			{
 				message = getHitMessage(false, row, col);
 				System.out.printf("The computer hit with %d%s. %s", rawRow,
-                        rawCol, message);
+						rawCol, message);
 			}
 			// Mark as a hit.
 			board[row][col] = 'X';
 		}
-        // For the benefit of the computer's strategy.
-        return message;
+		// For the benefit of the computer's strategy.
+		return message;
 	}
 	
 	/**
@@ -463,7 +463,7 @@ public class GameBoard
 				break;
 			default:
 				System.out.printf("Something went wrong! %s isn't a legal " +
-                        "ship type.", type);
+						"ship type.", type);
 				System.exit(1);
 				break;
 		}
@@ -514,8 +514,8 @@ public class GameBoard
 					break;
 				default:
 					System.out.println("Something went wrong! Check that " +
-                            "you have the right number & type of ships " +
-                            "placed and the right number of points per ship.");
+							"you have the right number & type of ships " +
+							"placed and the right number of points per ship.");
 					System.exit(1);
 					break;
 			}
@@ -596,7 +596,7 @@ public class GameBoard
 	 * 
 	 * @return representation of game board
 	 */
-    @Override
+	@Override
 	public String toString()
 	{
 		StringBuilder result = new StringBuilder();
