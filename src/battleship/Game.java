@@ -14,11 +14,11 @@
  * 		    distinction, this compiles all the .java files in src/battleship and
  * 		    then puts the .class files into the bin directory.)
  *      To run:
- * 	        Uncomment this line -- fname = "src/" + fname; -- in GameBoard class.
- * 	        Type: java -cp bin battleship.Game
- * 		    (This first gets the right ships.txt file, then temporarily sets
- * 		    classpath to bin folder and runs the Game class in the battleship
- * 		    package.)
+ *          Uncomment this line -- fname = "src/" + fname; -- in GameBoard class.
+ *          Type: java -cp bin battleship.Game
+ *          (This first gets the right ships.txt file, then temporarily sets
+ *          classpath to bin folder and runs the Game class in the battleship
+ *          package.)
  */
 
 package battleship;
