@@ -255,11 +255,22 @@ public class Game
 				 * uppercase for program logic.
 				 */
 				col = Character.toString(col).toUpperCase().charAt(0);
-				
+
 				// Column letter input is legal.
 				if (legalCols.contains(Character.toString(col)))
 				{
-					break;
+                    // But user has already shot here.
+                    if (ofComputer.getChar(row, col) == 'X' || ofComputer.getChar
+                            (row, col) == 'O')
+                    {
+                        System.out.println("You've already shot here! " +
+                                "Try again.\n");
+                    }
+                    else
+                    {
+                        // Legal shot.
+                        break;
+                    }
 				}
 				// Else, have user try again.
 				else
