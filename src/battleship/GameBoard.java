@@ -546,7 +546,20 @@ public class GameBoard
 	{
 		return board;
 	}
-	
+
+    /**
+     * Returns the char at that space on the board.
+     */
+    public char getChar(int rawRow, int rawCol)
+    {
+        // Subtract 1 because board is 0-indexed.
+        int row = rawRow - 1;
+        // Convert column letter to numerical index.
+        int col = "ABCDEFGHIJ".indexOf(rawCol);
+        return board[row][col];
+    }
+
+
 	/**
 	 * Returns String representation of each ship object on board.
 	 * 
